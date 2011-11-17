@@ -1,0 +1,48 @@
+    <div id="main" class="lift:surround?with=default;at=content">
+      <h2>A simple computer language</h2>
+      <p>
+          <span class="pHeader">Brief:</span> This is an implementation of
+          a simple imperative programming language.
+      </p>
+      <p>
+          <span class="pHeader">Implemented using:</span>
+          <a href="http://www.antlr.org/">
+            ANTLR (Another Language Recognition tool)
+          </a>
+      </p>
+      <h3>Demo</h3>
+
+	    <style>
+	    <!--
+	     .pHeader {
+	         font-weight: bold;
+	         text-decoration: capitalize;
+	     }
+	     .result {
+	        font-size: 2em;
+	     }
+	    -->
+	    </style>
+
+      <lift:LanguageSnippet.form form="POST">
+        <table>
+          <tbody>
+          <tr>
+          <td>String 1:</td>
+          <td> <levenshtein:string1/> </td>
+          <th rowspan="2">Levenshtein's distance: </th>
+          <th rowspan="2" class="result"> <levenshtein:result/> </th>
+          </tr>
+          <tr>
+          <td>String 2:</td>
+          <td> <levenshtein:string2/> </td>
+          </tr>
+          </tbody>
+	    </table>
+	    
+	    <levenshtein:submit/><br/>
+      </lift:LanguageSnippet.form>
+    </div>
+  </body>
+</html>
+

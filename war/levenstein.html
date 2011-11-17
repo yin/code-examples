@@ -6,14 +6,90 @@
   </head>
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
-      <h2>Levenstein's distance</h2>
+        <style>
+         .pHeader {
+             font-weight: bold;
+             text-transform: capitalize;
+         }
+         .result {
+            text-align: center;
+            font-size: 2em;
+         }
+         .myform input[type="text"] {
+            width: 100%;
+         }
+         .myform td:first-child {
+            text-align: right;
+            
+         }
+         div.levenshtein {
+            overflow: auto;
+            max-height: 400px;
+            display: none;
+         }
+         table.levenshtein {
+            width: 0%;
+            margin: 10px auto;
+            border-collapse: collapse;
+         }
+         table.levenshtein td,
+         table.levenshtein th {
+            text-align: center;
+            width: 2em;
+            height: 2em;
+            border: 1px solid lightgrey;
+            padding: 0;
+         }
+         table.levenshtein tr:last-child td:last-child {
+            background: #ffffa0;
+            border: 1px solid grey;
+         }
+        </style>
+
+      <h2>levenshtein distance</h2>
       <p>
-      
-	
+          <span class="pHeader">Brief:</span> Computes minimum number of
+          characters which must be changed, deleted and added in order to
+          change one string into another.
       </p>
-      <div class="lift:levenstein">
-	    Welcome to my Lift app.
-	  </div>
+      <p>
+          <span class="pHeader">Implemented as described in:</span>
+          <a href="http://en.wikipedia.org/wiki/Levenshtein_distance">
+            Levenshtein distance - Wikipedia, the free encyclopedia
+          </a>
+      </p>
+      <h3>Demo</h3>
+
+      <lift:LevenshteinSnippet.form form="GET" class="myform">
+        <table class="span-17 last">
+          <tbody>
+          <tr>
+            <td><label for="str1">String 1:</label></td>
+            <td> <levenshtein:string1/> </td>
+            <th rowspan="2">Levenshtein distance: </th>
+            <td rowspan="2" class="result"> <levenshtein:result/> </td>
+          </tr>
+          <tr>
+            <td><label for="str2">String 2:</label></td>
+            <td> <levenshtein:string2/> </td>
+          </tr>
+          <tr>
+            <td></td>
+            <td colspan="3">
+              <levenshtein:submit/>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+        
+        <h4 onclick="$('div.levenshtein').slideToggle();">
+          Resulting table of costs (click to show):
+        </h4>
+
+        <div class="span-17 last levenshtein">
+          <levenshtein:table/>
+        </div>
+      </lift:LevenshteinSnippet.form>
     </div>
   </body>
 </html>
