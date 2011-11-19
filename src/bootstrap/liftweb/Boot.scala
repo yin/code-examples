@@ -22,7 +22,8 @@ class Boot {
     // Build SiteMap
     val entries = List(
       Menu.i("Home") / "index",
-      Menu.i("Levenshtein") / "levenstein"
+      Menu.i("Levenshtein") / "levenstein",
+      Menu.i("Graph's") / "dijkstra"
       //,
       //Menu.i("Computer Language") / "language"
     )

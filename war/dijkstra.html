@@ -1,0 +1,78 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+  	<meta content="text/html; charset=UTF-8" http-equiv="content-type" />
+  	<title>(You should not see this!)</title>
+  </head>
+  <body class="lift:content_id=main">
+    <div id="main" class="lift:surround?with=default;at=content">
+        <script type="text/javascript" src="/scripts/jquery-graphs-0.1.js"></script>
+        <script type="text/javascript">
+        $(function() {
+            $('#canvas').graph();
+        })
+        </script>
+        <style>
+         .pHeader {
+             font-weight: bold;
+             text-transform: capitalize;
+         }
+         .result {
+            text-align: center;
+            font-size: 2em;
+         }
+         .myform input[type="text"] {
+            width: 100%;
+         }
+         .myform td:first-child {
+            text-align: right;
+            
+         }
+         #canvas {
+            position: relative;
+            /*
+            width: 620px;
+            height: 480px;
+            */
+         }
+         canvas {
+            border: 1px solid lightgrey;
+         }
+        </style>
+
+      <!-- <h2>Dijkstra's algorithm</h2> -->
+      <h2>Playing with Graphs in JavaScript</h2>
+      <p>
+          <span class="pHeader">Brief:</span>
+          <ul>
+            <li>Click empty space to create node.</li>
+            <li>Hold CTRL+click to link to last node.</li>
+            <li>Click a node and then another to link them.</li>
+          </ul>
+      </p>
+      <!-- 
+      <p>
+          <span class="pHeader">Implemented as described in:</span>
+          <a href="http://en.wikipedia.org/wiki/">
+             - Wikipedia, the free encyclopedia
+          </a>
+      </p>
+      <p>
+        <span class="pHeader">Sources:</span>
+        <a href="http://github.com/yin/">github.com/yin/</a>
+      </p>
+      -->
+      <h3>Demo</h3>
+      <div class="span-17 last">
+        <canvas id="canvas" width="620" height="320">
+        </canvas>
+        <button onclick="$('#json_out').text(JSON.stringify($('#canvas').getGraph(), null, '\t'))">Generate JSON</button>
+      </div>
+      <h4>Json:</h4>
+      <div class="span-17 last">
+        <pre id="json_out">
+        </pre>
+      </div>
+    </div>
+  </body>
+</html>
