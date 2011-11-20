@@ -3,11 +3,11 @@ package bootstrap.liftweb
 import net.liftweb._
 import util._
 import Helpers._
-
 import common._
 import http._
 import sitemap._
 import Loc._
+import sk.yin.web.snippet.GraphService
 
 
 /**
@@ -46,5 +46,11 @@ class Boot {
     // Force the request to be UTF-8
     LiftRules.early.append(_.setCharacterEncoding("UTF-8"))
 
+    // Web Services
+    val services = List(GraphService);
+    for (service <- services) {
+    	LiftRules.dispatch.append(service);
+    	LiftRules.statelessDispatchTable.append(service);
+    }
   }
 }

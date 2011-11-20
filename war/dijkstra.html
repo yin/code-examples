@@ -11,6 +11,12 @@
         $(function() {
             $('#canvas').graph();
         })
+        
+        function sendToServer(jqgraph) {
+        	var json = JSON.stringify(canvas.getGraph(), null, '\t');
+        	$('#json_out').text(json);
+        	
+        }
         </script>
         <style>
          .pHeader {
@@ -63,10 +69,10 @@
       </p>
       -->
       <h3>Demo</h3>
-      <div class="span-17 last">
+      <div class="span-17 last lift:Graphs">
         <canvas id="canvas" width="620" height="320">
         </canvas>
-        <button onclick="$('#json_out').text(JSON.stringify($('#canvas').getGraph(), null, '\t'))">Generate JSON</button>
+        <button onclick="sendToServer($('#canvas'));">Send to server</button>
       </div>
       <h4>Json:</h4>
       <div class="span-17 last">
