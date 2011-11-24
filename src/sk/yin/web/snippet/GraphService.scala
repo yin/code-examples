@@ -5,6 +5,8 @@ import net.liftweb.http.rest._
 import net.liftweb.json.JsonAST.JString
 import net.liftweb.json.JObject
 import net.liftweb.json.JsonAST.JField
+import net.liftweb.util.Helpers._
+import scala.xml.Text
 
 object GraphService extends RestHelper {
   
@@ -22,7 +24,8 @@ object GraphService extends RestHelper {
     case "api" :: "graphs" :: "dijkstra" :: _ JsonGet _ => JString("Hello world!")
   }
   
-  def store(name: String): JObject = {
-    
-  }
+  def store(name: String): JObject =
+    JObject(JField("msg", JString("Hello world!")) :: Nil)
+
+  def url = "url" #> "/api/graphs"
 }

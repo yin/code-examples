@@ -7,15 +7,24 @@
   <body class="lift:content_id=main">
     <div id="main" class="lift:surround?with=default;at=content">
         <script type="text/javascript" src="/scripts/jquery-graphs-0.1.js"></script>
-        <script type="text/javascript">
+        <script type="text/javascript" class=lift:graphService.url>
+        var url = "/api/graphs";
         $(function() {
             $('#canvas').graph();
         })
-        
         function sendToServer(jqgraph) {
-        	var json = JSON.stringify(canvas.getGraph(), null, '\t');
+        	var json = JSON.stringify(jqgraph.getGraph(), null, '\t');
         	$('#json_out').text(json);
-        	
+        	$.ajax(url, {
+        		accepts: 'text/json',
+        		dataType: 'json',
+        		data: {
+        			json: json
+        		},
+        		error: function(arg) {
+        			console.log("Error ", arg);
+        		}
+        	});
         }
         </script>
         <style>
@@ -53,7 +62,14 @@
           <ul>
             <li>Click empty space to create node.</li>
             <li>Hold CTRL+click to link to last node.</li>
-            <li>Click a node and then another to link them.</li>
+            <li>Click two nodes to link them.</li>
+          </ul>
+      </p>
+      <p>
+          <span class="pHeader">Notes:</span>
+          <ul>
+            <li>Server-side: Scala + Lift</li>
+            <li>Client: Hand written jQuery plugin + Ajax</li>
           </ul>
       </p>
       <!-- 
@@ -69,7 +85,7 @@
       </p>
       -->
       <h3>Demo</h3>
-      <div class="span-17 last lift:Graphs">
+      <div class="span-17 last">
         <canvas id="canvas" width="620" height="320">
         </canvas>
         <button onclick="sendToServer($('#canvas'));">Send to server</button>

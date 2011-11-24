@@ -18,7 +18,7 @@
 	<classpathentry kind="lib" path="war/WEB-INF/lib/mail-1.4.1.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/paranamer-2.3.jar"/>
 	<classpathentry kind="lib" path="war/WEB-INF/lib/slf4j-api-1.6.1.jar"/>
-	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER/App Engine"/>
 	<classpathentry combineaccessrules="false" exported="true" kind="src" path="/Levenshtein"/>
+	<classpathentry kind="con" path="com.google.appengine.eclipse.core.GAE_CONTAINER"/>
 	<classpathentry kind="output" path="war/WEB-INF/classes"/>
 </classpath>
