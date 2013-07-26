@@ -1,0 +1,11 @@
+Manifest-Version: 1.0
+Bundle-ManifestVersion: 2
+Bundle-Name: Wizard
+Bundle-SymbolicName: com.example.e3.rcp.hello;singleton:=true
+Bundle-Version: 1.0.0.qualifier
+Bundle-Activator: com.example.e3.rcp.wizard.Activator
+Bundle-Vendor: EXAMPLE
+Require-Bundle: org.eclipse.ui,
+ org.eclipse.core.runtime
+Bundle-RequiredExecutionEnvironment: JavaSE-1.6
+Bundle-ActivationPolicy: lazy
