@@ -13,7 +13,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ViewPart;
 
 public class View extends ViewPart {
-	public static final String ID = "a.view";
+	public static final String ID = "com.example.e3.rpc.commands.view";
 
 	private TableViewer viewer;
 
