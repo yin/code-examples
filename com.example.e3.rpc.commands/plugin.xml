@@ -20,11 +20,22 @@
       </perspective>
    </extension>
    <extension
+         id="com.example.e3.rpc.commands.hello"
          point="org.eclipse.ui.commands">
       <command
             defaultHandler="com.example.e3.rpc.commands.ExitHandler"
             id="com.example.e3.rpc.commands.ExitHandler"
             name="Exit">
+      </command>
+      <command
+            defaultHandler="com.example.e3.rpc.commands.HelloName"
+            id="com.example.e3.rpc.commands.hello"
+            name="Hello">
+         <commandParameter
+               id="com.example.e3.rpc.commands.hello.name"
+               name="name"
+               optional="true">
+         </commandParameter>
       </command>
    </extension>
    <extension
@@ -40,6 +51,30 @@
                   label="Truely Exit"
                   style="push"
                   tooltip="Exits the app">
+            </command>
+         </menu>
+         <menu
+               id="greetingsMenu"
+               label="Greetings">
+            <command
+                  commandId="com.example.e3.rpc.commands.hello"
+                  label="Hello Matej"
+                  style="push"
+                  tooltip="Say Hello">
+               <parameter
+                     name="com.example.e3.rpc.commands.hello.name"
+                     value="Matej">
+               </parameter>
+            </command>
+            <command
+                  commandId="com.example.e3.rpc.commands.hello"
+                  label="Hello Man"
+                  style="push"
+                  tooltip="Say Hello">
+               <parameter
+                     name="com.example.e3.rpc.commands.hello.name"
+                     value="Man">
+               </parameter>
             </command>
          </menu>
       </menuContribution>
