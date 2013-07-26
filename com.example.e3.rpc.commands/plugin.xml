@@ -19,6 +19,41 @@
             id="com.example.e3.rpc.commands.perspective">
       </perspective>
    </extension>
+      <extension
+         point="org.eclipse.ui.views">
+      <view
+            name="View"
+            class="com.example.e3.rpc.commands.View"
+            id="com.example.e3.rpc.commands.view">
+      </view>
+   </extension>
+   <extension
+         point="org.eclipse.ui.perspectiveExtensions">
+      <perspectiveExtension
+            targetID="*">
+         <view
+               standalone="true"
+               minimized="false"
+               relative="org.eclipse.ui.editorss"
+               relationship="left"
+               id="com.example.e3.rpc.commands.view">
+         </view>
+      </perspectiveExtension>
+   </extension>
+   <extension
+         point="org.eclipse.ui.menus">
+      <menuContribution
+            locationURI="menu:org.eclipse.ui.main.menu">
+         <menu
+               label="File">
+            <command
+                  commandId="org.eclipse.ui.file.exit"
+                  label="Exit">
+            </command>
+         </menu>
+      </menuContribution>
+   </extension>
+   
    <extension
          id="com.example.e3.rpc.commands.hello"
          point="org.eclipse.ui.commands">
@@ -77,6 +112,31 @@
                </parameter>
             </command>
          </menu>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:org.eclipse.ui.main.toolbar">
+         <toolbar
+               id="greetingsToolbar"
+               label="Greetings">
+            <command
+                  commandId="com.example.e3.rpc.commands.hello"
+                  icon="icons/alt_window_16.gif"
+                  label="Say Hello"
+                  style="push"
+                  tooltip="Say hello to you">
+            </command>
+         </toolbar>
+      </menuContribution>
+      <menuContribution
+            allPopups="false"
+            locationURI="toolbar:com.example.e3.rpc.commands.view">
+         <command
+               commandId="com.example.e3.rpc.commands.hello"
+               label="Hi"
+               style="push"
+               tooltip="Say hi">
+         </command>
       </menuContribution>
    </extension>
 
