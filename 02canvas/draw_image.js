@@ -1,9 +1,3 @@
-var canvas = null;
-var ctx = null;
-var assets = [];
-
-
-
 var frame = 0;
 var frame_rate = 1000.0/15;
 var canvas = null;
@@ -33,8 +27,6 @@ var setup = function() {
     canvas.width = 800;
     canvas.height = 600;
 
-
-console.log (body, body.appendChild)
     body.appendChild(canvas);
 
     // Load each image URL from the assets array into the frames array 

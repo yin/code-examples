@@ -1,5 +1,4 @@
 var setup = function() {
-    console.log('nare orgbe');
     var soundRequest = new XMLHttpRequest();
     soundRequest.open('GET', 'zombie_fight.mp3', true);
     soundRequest.responseType = 'arraybuffer';
