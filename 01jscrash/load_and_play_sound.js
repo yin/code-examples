@@ -6,7 +6,8 @@ var setup = function() {
 	soundRequest.onload = function () {
 
 		try {
-			var context = new webkitAudioContext();
+			window.AudioContext = window.AudioContext||window.webkitAudioContext;
+			var context = new AudioContext();
 
 			var mainNode = context.createGainNode(0);
 			mainNode.connect(context.destination);
