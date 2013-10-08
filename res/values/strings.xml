@@ -1,10 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-
     <string name="hello">Hello World, MainActivity!</string>
-    <string name="app_name">NodeClient</string>
+    <string name="app_name">Android Examples</string>
     <string name="add">Add an item</string>
     <string name="query">Search...</string>
     <string name="remove">Remove last</string>
 
+	<string name="welcome">Welcome!</string>
+	<string name="welcome_screen_name">Welcome screen</string>
 </resources>

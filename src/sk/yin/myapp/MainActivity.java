@@ -7,6 +7,7 @@ import android.view.*;
 import android.widget.*;
 import java.security.*;
 import sk.yin.myapp.MainActivity.*;
+import android.preference.*;
 
 public class MainActivity extends ListActivity
 {
@@ -45,12 +46,24 @@ public class MainActivity extends ListActivity
 				}
 			};
 		setListAdapter(adapter);
+		
+		if (!hasWelcomed()) {
+			Intent intent = new Intent(this, WelcomeActivity.class);
+			startActivity(intent);
+		}
+	}
+
+	private boolean hasWelcomed()
+	{
+		SharedPreferences pref = PreferenceManager.getDefaultSharedPreferences(this);
+		final boolean hasWelcome = pref.getBoolean("welcome", false);
+		return hasWelcome;
 	}
 	
 	@Override
 	public void onStart() {
 		super.onStart();
-
+		Toast.makeText(MainActivity.this, "Welcomed: " + hasWelcomed(), Toast.LENGTH_LONG).show();
 	}
 	
 	private HashedString hs(String s) {
