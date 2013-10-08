@@ -13,7 +13,7 @@ public class MainActivity extends ListActivity
     /** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
-	{   final int itemId = android.R.layout.two_line_list_item;
+	{   final int itemId = R.layout.item;
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 		ListAdapter adapter = new ArrayAdapter<HashedString>(this,
@@ -28,8 +28,8 @@ public class MainActivity extends ListActivity
 						listItemView = inflater.inflate(itemId, parent, false);
 					}
 					// The ListItemLayout must use the standard text item IDs.
-					TextView lineOneView = (TextView)listItemView.findViewById(android.R.id.text1);
-					TextView lineTwoView = (TextView)listItemView.findViewById(android.R.id.text2);
+					TextView lineOneView = (TextView)listItemView.findViewById(R.id.text1);
+					TextView lineTwoView = (TextView)listItemView.findViewById(R.id.text2);
 					HashedString t = (HashedString)getItem(position);
 					lineOneView.setText(lineOneText(t));
 					lineTwoView.setText(lineTwoText(t));
