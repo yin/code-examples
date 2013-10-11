@@ -11,7 +11,8 @@ import android.preference.*;
 
 public class MainActivity extends ListActivity
 {
-    /** Called when the activity is first created. */
+    private Algorithm[] algos = new Algorithm[] {};
+	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
 	{   final int itemId = R.layout.item;
@@ -68,6 +69,15 @@ public class MainActivity extends ListActivity
 	
 	private HashedString hs(String s) {
 		return new HashedString(s);
+	}
+	
+	public static interface Algorithm {
+		int getViewId();
+		String getName();
+		String getDisplay();
+		void onLoad(View view);
+		void onUnload();
+		// on button pressed... on onput changed?
 	}
 	
 	public static class HashedString
