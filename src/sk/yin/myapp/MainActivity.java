@@ -18,41 +18,10 @@ public class MainActivity extends ListActivity
 	/** Called when the activity is first created. */
     @Override
     public void onCreate(Bundle savedInstanceState)
-	{   final int itemId = R.layout.item;
+	{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
-		ListAdapter adapter = new ArrayAdapter<AlgorithmEntry>(this,
-															   itemId,
-															   algos) {
-			@Override
-			public View getView(int position, View convertView, ViewGroup parent)
-			{
-				LayoutInflater inflater = (LayoutInflater)getContext()
-					.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-				View listItemView = convertView;
-				if (null == convertView)
-				{
-					listItemView = inflater.inflate(itemId, parent, false);
-				}
-				// The ListItemLayout must use the standard text item IDs.
-				TextView lineOneView = (TextView)listItemView.findViewById(R.id.text1);
-				TextView lineTwoView = (TextView)listItemView.findViewById(R.id.text2);
-				AlgorithmEntry t = (AlgorithmEntry) getItem(position);
-				lineOneView.setText(lineOneText(t));
-				lineTwoView.setText(lineTwoText(t));
-				return listItemView;
-			}
-
-			private CharSequence lineOneText(AlgorithmEntry e)
-			{
-				return e.getDisplay();
-			}
-
-			private CharSequence lineTwoText(AlgorithmEntry e)
-			{
-				return e.getName();
-			}
-		};
+		ListAdapter adapter = new ListableAdapter(this, algos);
 		setListAdapter(adapter);
 
 		if (!hasWelcomed())
@@ -80,7 +49,7 @@ public class MainActivity extends ListActivity
 	{
 		if ("sha1".equals(s))
 		{
-			return new BasicAlgoEntry(new Sha1Algorithm(), "digest", "sha1");
+			return new BasicAlgoEntry(new Sha1Algorithm(), "sha1");
 		}
 		else
 		{
@@ -88,46 +57,27 @@ public class MainActivity extends ListActivity
 		}
 	}
 
-	public static interface Algorithm
-	{
-		//TODO: This should be asynch using Task's, even report progress
-		Object compute(Map<String, Object> inputs);
-	}
-
-	public static interface AlgorithmEntry
-	{
-		int getViewId();
-		String getName();
-		String getDisplay();
-		void onLoad(View view);
-		void onUnload();
-		// on button pressed... on input changed?
-		Algorithm getAlgorithm();
-	}
-
-	public static interface ValueResultMapping
-	{
-		Map<String, Object> getInputs();
-		Object getOutput();
-		String getInputDisplay();
-		String getOutputDisplay();
-	}
-
-
-
-	public static class BasicResult
+	public static class BasicResult implements ComputeResult, Listable
 	{
 		private Map<String, Object> inputs;
 
 		private Object result;
 
-		public BasicResult()
-		{}
+		public BasicResult() {}
 
-		public BasicResult(Map<String,Object> inputs, Object result)
-		{
+		public BasicResult(Map<String,Object> inputs, Object result) {
 			this.inputs = inputs;
 			this.result = result;
+		}
+
+		public void setResult(Object result)
+		{
+			this.result = result;
+		}
+
+		public Object getResult()
+		{
+			return result;
 		}
 
 		public void setInputs(Map<String, Object> inputs)
@@ -143,10 +93,24 @@ public class MainActivity extends ListActivity
 		{
 			return String.valueOf(inputs);
 		}
+		
 		public String getOutputDisplay()
 		{
 			return String.valueOf(result);
 		}
+		
+		public int getViewId() {
+			return R.layout.item;
+		}
+
+		public String getTitle() {
+			return getInputDisplay();
+		}
+
+		public String getSubtitle() {
+			return getOutputDisplay();
+		}
+		
 	}
 
 	public static class Sha1Algorithm implements Algorithm
@@ -201,33 +165,27 @@ public class MainActivity extends ListActivity
 
 	public static class BasicAlgoEntry implements AlgorithmEntry
 	{
-
-		private String name;
-
 		private String display;
 
-		private MainActivity.Algorithm algo;
+		private Algorithm algo;
 
-		public BasicAlgoEntry(MainActivity.Algorithm algo, String name, String display)
+		public BasicAlgoEntry(Algorithm algo, String display)
 		{
-			this.name = name;
 			this.display = display;
 			this.algo = algo;
 		}
 
 		public int getViewId()
 		{
-			return 0;
+			return R.layout.item;
 		}
-
-		public String getName()
-		{
-			return name;
+		
+		public String getTitle() {
+			return getDisplay();
 		}
-
-		public String getDisplay()
-		{
-			return display;
+		
+		public String getSubtitle() {
+			return algo != null ? algo.getClass().getSimpleName() : "<no algorithm>";
 		}
 
 		public void onLoad(View view)
@@ -238,20 +196,14 @@ public class MainActivity extends ListActivity
 		{
 		}
 
-		public MainActivity.Algorithm getAlgorithm()
+		public Algorithm getAlgorithm()
 		{
-			// TODO: Implement this method
 			return algo;
 		}
 
-		public void setName(String name)
+		public String getDisplay()
 		{
-			this.name = name;
-		}
-
-		public void setDisplay(String display)
-		{
-			this.display = display;
+			return display;
 		}
 	}
 }
