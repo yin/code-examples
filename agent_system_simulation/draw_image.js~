@@ -17,6 +17,8 @@ var frames = [];
 function Environment() {
 	$.extend(this, {
 		agents: [],
+		width: 0;
+		height: 0,
 		queryNearest: function(x, y) {
 			var minDist = false;
 			var minIndex = false;
@@ -40,7 +42,7 @@ function Agent(env) {
 	$.extend(this, {
 		env: env,
 		x: Math.random() * env.width,
-		y: Math.random() * env.width,
+		y: Math.random() * env.height,
 		vx: Math.random() - .5,
 		vy: Math.random() - .5,
 		color: get_random_color,

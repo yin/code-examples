@@ -81,6 +81,7 @@ var setup = function() {
     world.height = canvas.height = 600;
 
     body.appendChild(canvas);
+    alert(0);
     
     for(var i = 0; i < 100; i++) {
         world.agents.push(new Agent(world));
