@@ -13,6 +13,7 @@ import sk.yin.myapp.MainActivity.*;
 public class MainActivity extends ListActivity {
     private AlgorithmEntry[] algos = new AlgorithmEntry[] {
 		ae("sha1"),
+		ae("md5"),
 	};
 	/** Called when the activity is first created. */
     @Override
@@ -20,26 +21,20 @@ public class MainActivity extends ListActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
 		ListView lv = (ListView) findViewById(android.R.id.list);
-		try{
-			lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-					public void onItemClick(AdapterView list, View item, int i, long l) {
-						FragmentTransaction t = getFragmentManager().beginTransaction();
-						Fragment f = new AlgorithmFragment();
-						
-						t.add(R.id.frags, f);
-						t.commit();
-						Toast.makeText(MainActivity.this, "click " +item, Toast.LENGTH_LONG).show();
-					}
-				});
-		}catch(Exception e) {
+		lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+				public void onItemClick(AdapterView list, View item, int i, long l) {
+					FragmentTransaction t = getFragmentManager().beginTransaction();
+					Fragment f = new AlgorithmFragment();
 
-			Toast.makeText(MainActivity.this, "Welcomed: " + e.toString(), Toast.LENGTH_LONG);
-		}
-		
+					t.add(R.id.frags, f);
+					t.addToBackStack(null);
+					t.commit();
+					Toast.makeText(MainActivity.this, "click " + item, Toast.LENGTH_LONG).show();
+				}
+			});
 		ListAdapter adapter = new ListableAdapter(this, algos);
 		setListAdapter(adapter);
-	
-				
+
 		if (!hasWelcomed()) {
 			Intent intent = new Intent(this, WelcomeActivity.class);
 			startActivity(intent);
@@ -59,7 +54,10 @@ public class MainActivity extends ListActivity {
 
 	private AlgorithmEntry ae(String s) {
 		if ("sha1".equals(s)) {
-			return new BasicAlgoEntry(new Sha1Algorithm(), "sha1");
+			return new BasicAlgoEntry(new DigestAlgorithm(), "sha1");
+		}
+		else if ("md5".equals(s)) {
+			return new BasicAlgoEntry(new DigestAlgorithm(), "md5");
 		}
 		else {
 			return null;
@@ -113,47 +111,6 @@ public class MainActivity extends ListActivity {
 			return getOutputDisplay();
 		}
 
-	}
-
-	public static class Sha1Algorithm implements Algorithm {
-		private static final String MSG_CANT_DO_HASH = "No hash available...";
-
-		public String compute(Map<String,Object> inputs) { 
-			if (inputs != null && inputs.size() > 0) {
-				String text = (String)inputs.values().iterator().next();
-				return getSha1(text);
-			}
-			return null;
-		}
-
-		public String getSha1(String str) {
-			try {
-				MessageDigest md = MessageDigest.getInstance("SHA1");
-				md.update(str.getBytes());
-				byte[] hash = md.digest();
-				//TODO: Cache this.
-				return toHex(hash);
-			}
-			catch (NoSuchAlgorithmException e) {
-				return MSG_CANT_DO_HASH;
-			}
-		}
-
-		private String toHex(byte[] hash) {
-			StringBuilder sb = new StringBuilder();
-			for (byte b : hash) {
-				int u = (b >> 4) & 0x0F,
-				    l = b & 0x0F;
-				char uhex = toHex(u),
-				    lhex = toHex(l);
-			    sb.append(uhex).append(lhex);
-			}
-			return sb.toString();
-		}
-
-		private char toHex(int i) {
-			return (char) (i < 10 ? '0' + i : 'a' + (i % 10));
-		}
 	}
 
 	public static class BasicAlgoEntry implements AlgorithmEntry {
