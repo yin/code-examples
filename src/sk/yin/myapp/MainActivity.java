@@ -19,9 +19,27 @@ public class MainActivity extends ListActivity {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+		ListView lv = (ListView) findViewById(android.R.id.list);
+		try{
+			lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+					public void onItemClick(AdapterView list, View item, int i, long l) {
+						FragmentTransaction t = getFragmentManager().beginTransaction();
+						Fragment f = new AlgorithmFragment();
+						
+						t.add(R.id.frags, f);
+						t.commit();
+						Toast.makeText(MainActivity.this, "click " +item, Toast.LENGTH_LONG).show();
+					}
+				});
+		}catch(Exception e) {
+
+			Toast.makeText(MainActivity.this, "Welcomed: " + e.toString(), Toast.LENGTH_LONG);
+		}
+		
 		ListAdapter adapter = new ListableAdapter(this, algos);
 		setListAdapter(adapter);
-
+	
+				
 		if (!hasWelcomed()) {
 			Intent intent = new Intent(this, WelcomeActivity.class);
 			startActivity(intent);
@@ -37,7 +55,6 @@ public class MainActivity extends ListActivity {
 	@Override
 	public void onStart() {
 		super.onStart();
-		Toast.makeText(MainActivity.this, "Welcomed: " + hasWelcomed(), Toast.LENGTH_LONG).show();
 	}
 
 	private AlgorithmEntry ae(String s) {
