@@ -6,17 +6,18 @@
 	android:paddingRight="8dp"
     android:gravity="center"
     android:orientation="horizontal"
+    android:baselineAligned="false"
 	android:id="@+id/frags">
 
-	<fragment
+	<fragment android:id="@+id/listing"
 		android:name="sk.yin.myapp.AlgolistFragment"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
+		android:layout_height="match_parent"
 		android:layout_weight="1" />
 
-	<fragment
-		android:name="sk.github.myapp.AlgorithmFragment"
+	<fragment android:id="@+id/algo"
+		android:name="sk.yin.myapp.AlgorithmFragment"
 		android:layout_width="match_parent"
-		android:layout_height="wrap_content"
-		android:layout_weight="2" />
+		android:layout_height="match_parent"
+		android:layout_weight="1" />
 </LinearLayout>

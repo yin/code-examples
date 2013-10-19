@@ -1,10 +1,11 @@
 package sk.yin.myapp;
 
-import android.app.*;
-import android.content.*;
-import android.view.*;
-import android.widget.*;
-import sk.yin.myapp.*;
+import android.content.Context;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.TextView;
 
 public class ListableAdapter extends ArrayAdapter<Listable>
 {
