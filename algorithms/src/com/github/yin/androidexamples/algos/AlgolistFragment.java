@@ -1,7 +1,7 @@
 package com.github.yin.androidexamples.algos;
 
 import android.app.Activity;
-import android.app.ListFragment;
+import android.support.v4.app.ListFragment;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -45,7 +45,7 @@ public class AlgolistFragment extends ListFragment {
 	public void onListItemClick(ListView listView, View itemView,
 			int position, long id) {
 		if(moderator != null) {
-			moderator.onObjectSelected(listView.getSelectedItem());
+			moderator.onObjectSelected(listView.getItemAtPosition(position));
 		}
 		listView.setItemChecked(position, true);
 	}

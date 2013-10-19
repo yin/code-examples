@@ -4,6 +4,16 @@ import java.security.*;
 import java.util.*;
 
 public class DigestAlgorithm implements Algorithm {
+
+	private static final Map<String, Class<?>> INPUT_TYPES = new HashMap();
+
+	public Map<String, Class<?>> getInputTypes() {
+		if (INPUT_TYPES.size() == 0) {
+			INPUT_TYPES.put("string", String.class);
+		}
+		return INPUT_TYPES;
+	}
+
 	private static final String MSG_CANT_DO_HASH = "No hash available...";
 
 	public String compute(Map<String,Object> inputs) { 
