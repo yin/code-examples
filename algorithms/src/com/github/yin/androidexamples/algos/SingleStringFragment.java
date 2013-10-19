@@ -1,4 +1,4 @@
-package sk.yin.myapp;
+package com.github.yin.androidexamples.algos;
 
 import android.os.Bundle;
 import android.app.Fragment;
@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
+import com.github.yin.androidexamples.algos.R;
 
 public class SingleStringFragment extends Fragment 
 {

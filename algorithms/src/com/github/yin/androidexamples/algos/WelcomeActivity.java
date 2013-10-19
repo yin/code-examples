@@ -1,4 +1,4 @@
-package sk.yin.myapp;
+package com.github.yin.androidexamples.algos;
 
 
 import android.app.*;
@@ -8,6 +8,7 @@ import android.widget.*;
 import android.content.*;
 import android.preference.*;
 import android.view.View.*;
+import com.github.yin.androidexamples.algos.R;
 
 public class WelcomeActivity extends Activity
 {

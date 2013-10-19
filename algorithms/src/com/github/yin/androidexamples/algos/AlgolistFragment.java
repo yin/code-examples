@@ -1,7 +1,6 @@
-package sk.yin.myapp;
+package com.github.yin.androidexamples.algos;
 
 import java.util.Map;
-
 import android.app.Fragment;
 import android.app.FragmentTransaction;
 import android.app.ListFragment;
@@ -13,6 +12,7 @@ import android.widget.AdapterView;
 import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
+import com.github.yin.androidexamples.algos.R;
 
 
 public class AlgolistFragment extends ListFragment {

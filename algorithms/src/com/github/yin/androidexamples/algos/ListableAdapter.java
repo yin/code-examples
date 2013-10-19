@@ -1,4 +1,4 @@
-package sk.yin.myapp;
+package com.github.yin.androidexamples.algos;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,6 +6,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
+import com.github.yin.androidexamples.algos.R;
 
 public class ListableAdapter extends ArrayAdapter<Listable>
 {

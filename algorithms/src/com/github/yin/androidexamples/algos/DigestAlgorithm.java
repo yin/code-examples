@@ -1,4 +1,4 @@
-package sk.yin.myapp;
+package com.github.yin.androidexamples.algos;
 
 import java.security.*;
 import java.util.*;

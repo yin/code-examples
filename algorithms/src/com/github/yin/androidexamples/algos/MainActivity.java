@@ -1,4 +1,4 @@
-package sk.yin.myapp;
+package com.github.yin.androidexamples.algos;
 
 import android.app.Activity;
 import android.content.Intent;
@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.view.View;
+import com.github.yin.androidexamples.algos.R;
 
 public class MainActivity extends Activity {
 	/** Called when the activity is first created. */
