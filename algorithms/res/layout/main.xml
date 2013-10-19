@@ -1,23 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="fill_parent"
-    android:layout_height="fill_parent"
-	android:paddingLeft="8dp"
-	android:paddingRight="8dp"
-    android:gravity="center"
-    android:orientation="horizontal"
-    android:baselineAligned="false"
-	android:id="@+id/frags">
 
-	<fragment android:id="@+id/listing"
-		android:name="com.github.yin.androidexamples.algos.AlgolistFragment"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_weight="1" />
-
-	<fragment android:id="@+id/algo"
-		android:name="com.github.yin.androidexamples.algos.AlgorithmFragment"
-		android:layout_width="match_parent"
-		android:layout_height="match_parent"
-		android:layout_weight="1" />
-</LinearLayout>
+<!-- Here we'll place our fragments dynamicly: -->
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/fragment_container"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent" />
