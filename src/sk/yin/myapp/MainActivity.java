@@ -55,11 +55,9 @@ public class MainActivity extends ListActivity {
 	private AlgorithmEntry ae(String s) {
 		if ("sha1".equals(s)) {
 			return new BasicAlgoEntry(new DigestAlgorithm(), "sha1");
-		}
-		else if ("md5".equals(s)) {
+		} else if ("md5".equals(s)) {
 			return new BasicAlgoEntry(new DigestAlgorithm(), "md5");
-		}
-		else {
+		} else {
 			return null;
 		}
 	}
