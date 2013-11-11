@@ -1,0 +1,4 @@
+#!/bin/grep me
+This a specialized skript.
+It print only lines conatining the word 'me'.
+Don't ask me why...
