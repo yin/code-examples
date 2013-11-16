@@ -99,6 +99,8 @@ function doEval(elem) {
   <a href="01constructor-basic.html">01 Objects - Constructor</a>
   <a href="02constructor-drawing.html">02 Objects - Constructor (drawing)</a>
   <a href="03constructor-timing.html">03 Objects - Constructor (timing)</a>
+  <a href="04prototype-sequential.html">04 Objects - Prototype (sequential declaration)</a>
+  <a href="05prototype-atonce.html">05 Objects - Prototype (declaring all at once)</a>
 </div>
 <div class="container">
   <h2>Code goes here:</h2>
@@ -159,7 +161,7 @@ var steps = [30, 30, 15];
 var turns = [null, 10, 80];
 var delay = 1000;
 ctx.setTransform(1, 0, 0, 1, 0, 0);
-ctx.clearRect(-1, -1, canvas.width, canvas.height);
+ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 it01.update().draw(ctx).mark(dom_marker);
 
