@@ -1,0 +1,108 @@
+<!doctype html>
+<html>
+<head>
+<style>
+body {
+    padding: 10px 16px 
+    background: #e8e8e8;
+}
+#code {
+    display: block;
+}
+#code_container {
+    float: left;
+}
+#console_container {
+    float: left;
+}
+#console {
+    width: 40em;
+    height: 35em;
+    background: #303030;
+}
+#console pre {
+    color: #30d030;
+    border: 1px solid #30d030;
+    margin: 1px 2px;
+}
+</style>
+<script type="text/javascript">
+if(console) {
+    console.__orig_log = console.log;
+    console.log = function() {
+        var con = document.getElementById('console');
+        var msg = document.createElement('pre');
+        var str = '';
+        for(var i = 0, l = arguments.length; i < l; i++) {
+            if(i) str += ' ';
+            str += new String(arguments[i]);
+        }
+        msg.appendChild(document.createTextNode(str));
+        con.appendChild(msg);
+        console.__orig_log.apply(this, arguments);
+    }
+}
+function onkey(e) {
+    var key = e.key || e.keyCode;
+    if((key == 13 || key == 10) && e.ctrlKey) {
+      doEval(e.target);
+      return true;
+    }
+}
+function oneval(e) {
+    doEval(document.getElementById('code'));
+}
+function doEval(elem) {
+    try {
+        eval(elem.value);
+    } catch(e) {
+        console.log(e);
+    }
+}
+</script>
+</head>
+<body>
+<div id="code_container">
+<h2>Code goes here:</h2>
+<textarea rows="35" cols="80" id="code" onkeypress="onkey(event);">
+var _things = 0;
+function Thing(angle) {
+    // Variables declared in constructor are private to the constuctor.
+    var thing_num = ++_things;
+    
+    // Variables accessed trhough 'this' keyword are public and visible everywhere.
+    this.x = 0;
+    this.y = 0;
+    this.alpha = angle / 180.0*Math.PI;
+    
+    // Class methods follow
+    this.step = function(distance) {
+        this.x += distance * Math.cos(this.alpha);
+        this.y += distance * Math.sin(this.alpha);
+        return this;
+    };
+    this.update = function(canvas, domelement) {
+	console.log("Thing #" + thing_num + " is at:", it01.x, 'x', it01.y,
+	    "and looks at", this.aplha * 180.0/Math.PI, "degrees");
+	return this;
+    }
+}
+
+// Create a new Object from function Thing(angle) 
+var it01 = new Thing(66);
+
+// Play with it!
+it01.update()
+    .step(10).update()
+    .step(5).update();
+</textarea>
+<button id="run" onclick="oneval(event);">Ctrl+Enter to Run this code</button>
+</div>
+<div id="console_container">
+<h2>Logs show up here:</h2>
+<div id="console">
+</div>
+</div>
+</body>
+</html>
+
