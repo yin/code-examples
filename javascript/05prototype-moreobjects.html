@@ -41,7 +41,7 @@ body {
     top: 19em;
 }
 #dom_containter .marker {
-    position: relative;
+    position: absolute;
     left: -0.5em
     top: -0.5em;
 }
@@ -106,7 +106,7 @@ function doEval(elem) {
   <h2>Code goes here:</h2>
   <textarea rows="35" cols="80" id="code">
 var _things = 0;
-var _cross = 16 / 2;
+var _cross = 7.0 / 2;
 // The properties (variables) aren't in the constructor anymore...
 function Thing(angle) {
     var thing_num = ++_things;
@@ -134,13 +134,14 @@ Thing.prototype = {
     },
     update: function(canvas, domelement) {
         console.log("Thing #" + this.getThingNum() + " is at:", it01.x, 'x', it01.y,
-            "and looks at", this.aplha * 180.0/Math.PI, "degrees");
+            "and looks at", this.alpha * 180.0/Math.PI, "degrees");
         return this;
     },
     draw: function(ctx2d) {
         ctx2d.save();
         ctx2d.setTransform(1, 0, 0, 1, 0, 0);
         ctx2d.translate(ctx.canvas.width / 2, ctx.canvas.height / 2);
+        ctx2d.rotate(this.alpha);
         ctx2d.beginPath();
         ctx2d.moveTo(this.x - _cross, this.y);
         ctx2d.lineTo(this.x + _cross, this.y);
@@ -158,34 +159,69 @@ Thing.prototype = {
     }
 };
 
+function Delayed(func, ms) {
+	var self = this;
+	this.next = null;
+	this.delay = function(next) {
+		this.next = new Delayed(next, ms);
+                return this.next;
+	};
+	this.run = function(a) {
+		setTimeout(function() {
+			try {
+				func(a);
+			} catch(e) {
+				console.log('error running delayed function: ', e);
+			}
+			if(self.next != null) {
+				self.next.run(a+1);
+			}
+		}, ms);
+	}
+}
+function delay(func) {
+	var delayed = new Delayed(func, 100);
+	delayed.run(0);
+	return delayed;
+}
+
 var it01 = new Thing();
-var dom_marker = document.getElementById('dom_marker');
+var it02 = new Thing();
+var dom_marker = document.getElementById('dom_marker1');
+var dom_marker = document.getElementById('dom_marker2');
 var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 
-var steps = [30, 30, 15];
-var turns = [null, 10, 80];
-var delay = 1000;
+canvas.width = canvas.parentNode.offsetWidth;
+canvas.height = canvas.parentNode.offsetHeight;
+
 ctx.setTransform(1, 0, 0, 1, 0, 0);
 ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-it01.update().draw(ctx).mark(dom_marker);
+var plan = delay(function(x) {
+	it01 .update().draw(ctx).mark(dom_marker1);
+	it02 .update().draw(ctx).mark(dom_marker2);
+}).delay(function(x) {
+	it01 .turn_degrees(10).step(10) .update().draw(ctx).mark(dom_marker1);
+	it02 .turn_degrees(-10).step(10) .update().draw(ctx).mark(dom_marker2);
+}).delay(function(x) {
+	it01 .turn_degrees(5).step(10) .update().draw(ctx).mark(dom_marker1);
+	it02 .turn_degrees(-5).step(10) .update().draw(ctx).mark(dom_marker2);
+}).delay(function(x) {
+	it01 .turn_degrees(0).step(10) .update().draw(ctx).mark(dom_marker1);
+	it02 .turn_degrees(0).step(10) .update().draw(ctx).mark(dom_marker2);
+}).delay(function(x) {
+	it01 .turn_degrees(-5).step(10) .update().draw(ctx).mark(dom_marker1);
+	it02 .turn_degrees(5).step(10) .update().draw(ctx).mark(dom_marker2);
+});
 
-setTimeout(function() {
-    it01.step(steps[0])
-        .update().draw(ctx).mark(dom_marker);
-
-    setTimeout(function() {
-        it01.turn_degrees(turns[1]).step(steps[1])
-            .update().draw(ctx).mark(dom_marker);
-
-        setTimeout(function() {
-            it01.turn_degrees(turns[2]).step(steps[2])
-                .update().draw(ctx).mark(dom_marker);
-        }, delay);
-    }, delay);
-}, delay);
-  </textarea>
+for (var i = 0; i &lt; 25; i++) {
+	plan = plan.delay(function() {
+		it01 .turn_degrees(-35 + i).step(10) .update().draw(ctx).mark(dom_marker1);
+		it02 .turn_degrees(30 - i).step(10) .update().draw(ctx).mark(dom_marker2);
+	})
+}
+</textarea>
   <button id="run" onclick="oneval(event);">Ctrl+Enter to Run this code</button>
 </div>
 <div class="container">
@@ -204,7 +240,8 @@ setTimeout(function() {
   <h2>And finally, DOM + CSS</h2>
   <div class="contained">
     <div class="centered">
-    	<div id="dom_marker">x</div>
+    	<div id="dom_marker1" class="marker">x</div>
+    	<div id="dom_marker2" class="marker">o</div>
     <div>
   </div>
 </div>
