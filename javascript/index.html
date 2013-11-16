@@ -26,7 +26,6 @@ body {
     margin: 1px 2px;
     padding: 2px 4px 1px 4px;
 }
-
 </style>
 <script type="text/javascript">
 if(console && console._log == undefined) {
@@ -70,49 +69,20 @@ function doEval(elem) {
 <body onkeypress="onkey(event);">
 <div id="nav">
   <a href="index.html">00 How it works</a>
-  <a href="01constructor-basic.html">01 How it works</a>
-  <a href="02constructor-drawing.html">02 How it works</a>
+  <a href="01constructor-basic.html">01 Objects - constructors</a>
+  <a href="02constructor-drawing.html">02 Objects - adding methods for drawing</a>
 </div>
 <div id="code_container">
-<h2>Code goes here:</h2>
-<textarea rows="35" cols="80" id="code">
-var _things = 0;
-function Thing(angle) {
-    // Variables declared in constructor are private to the constuctor.
-    var thing_num = ++_things;
-    
-    // Variables accessed trhough 'this' keyword are public and visible everywhere.
-    this.x = 0;
-    this.y = 0;
-    this.alpha = angle ? (angle / 180.0*Math.PI) : 0;
-    
-    // Class methods follow
-    this.step = function(distance) {
-        this.x += distance * Math.cos(this.alpha);
-        this.y += distance * Math.sin(this.alpha);
-        return this;
-    };
-    this.update = function(canvas, domelement) {
-	console.log("Thing #" + thing_num + " is at:", it01.x, 'x', it01.y,
-	    "and looks at", this.alpha * 180/Math.PI, "degrees");
-	return this;
-    }
-}
-
-// Create a new Object from function Thing(angle) 
-var it01 = new Thing(66);
-
-// Play with it!
-it01.update()
-    .step(10).update()
-    .step(5).update();
-</textarea>
-<button id="run" onclick="oneval(event);">Ctrl+Enter to Run this code</button>
+  <h2>Code goes here:</h2>
+  <textarea rows="35" cols="80" id="code">
+console.log("Hello world")
+  </textarea>
+  <button id="run" onclick="oneval(event);">Ctrl+Enter to Run this code</button>
 </div>
 <div id="console_container">
-<h2>Logs show up here:</h2>
-<div id="console">
-</div>
+  <h2>Logs show up here:</h2>
+  <div id="console">
+  </div>
 </div>
 </body>
 </html>
