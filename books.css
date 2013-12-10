@@ -4,4 +4,11 @@
 	border: 1px solid #808080;
 	background: #b0b0b0;
 }
+.block {
+  display: block;
+	margin: 4px;
+	padding: 5px;
+	border: 1px solid #b0b0b0;
+	background: #d0d0d0;
+}
 
