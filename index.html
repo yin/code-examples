@@ -1,35 +1,44 @@
 <!doctype html>
-<html ng-app>
+<html ng-app="books">
   <head>
-    <script src="books.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
+    <script src="tabs.js"></script>
+    <script src="books.js"></script>
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="books.css">
+    <script src="//netdna.bootstrapcdn.com/bootstrap/3.0.3/js/bootstrap.min.js"></script>
   </head>
   <body>
     <h2>Kniznica</h2>
     <h3>Zaklady Softveroveho Inzinierstva</h4>
-    <div ng-controller="BooksCtrl">
-      <span>{{books.length}} knih:</span>
-      <ul>
-        <li ng-repeat="book in books">
+    <tabs>
+      <pane title="Knihy">
+      <div ng-controller="BooksCtrl">
+        <h4>{{books.length}} knih v kniznici:</h4>
+        <div ng-repeat="book in books" class="bookblock">
           {{book.name}} - {{book.year}} - {{book.author}}
-        </li>
-      </ul>
-      <form ng-submit="add()">
-        <label>Nazov:</label>
-        <input type="text" ng-model="bookName" placeholder="Nazov knihy">
-        <br>
-        <label>Autor:</label>
-        <input type="text" ng-model="author">
-        <br>
-        <label>Rok vydania:</label>
-        <input type="text" ng-model="year">
-        <br>
-        <label>Pocet kusov:</label>
-        <input type="text" ng-model="count">
-        <br>
-        <input class="btn-primary" type="submit" value="add">
-      </form>
-    </div>
+        </div>
+        <form ng-submit="add()">
+          <label>Nazov:</label>
+          <input type="text" ng-model="bookName" placeholder="Nazov knihy">
+          <br>
+          <label>Autor:</label>
+          <input type="text" ng-model="author">
+          <br>
+          <label>Rok vydania:</label>
+          <input type="text" ng-model="year">
+          <br>
+          <label>Pocet kusov:</label>
+          <input type="text" ng-model="count">
+          <br>
+          <input class="btn-primary" type="submit" value="add">
+        </form>
+      </div>
+      </pane>
+      <pane title="Uzivatelia">
+        <h4>Uzivatelia</h4>
+      </pane>
+    </tabs>
   </body>
 </html>
 
