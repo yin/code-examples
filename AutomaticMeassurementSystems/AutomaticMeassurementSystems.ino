@@ -6,15 +6,15 @@
  This example code is in the public domain.
  */
 
-#define SensorLED     1
-#define SensorINPUT   3  //Connect the sensor to digital Pin 3 which is Interrupts 1.
+#define VERSION     "1.0"
+#define LED          0
 
-String readString;
+int timeSeries[10];
+int timePosition = -1;
 
 // the setup routine runs once when you press reset:
 void setup() {
-  pinMode(SensorLED, OUTPUT); 
-  pinMode(SensorINPUT, INPUT);
+  pinMode(LED, OUTPUT); 
 
   // initialize serial communication at 9600 bits per second:
   Serial.begin(9600);
@@ -32,25 +32,21 @@ void loop() {
         int analogValue = analogRead(A0);
         Serial.println(analogValue);
       } else if(command == 'w') {
-        Serial.println("Welcome, I am Arduino - The automatic meassurement system.");
+        Serial.print("Welcome, I am Arduino - The automatic meassurement system ");
+        Serial.print(VERSION);
+        Serial.println(".");
       } else if(command == 'h') {
-        Serial.println("Command help")
+        Serial.println("Command help");
+        Serial.println("h - This Command help message");
+        Serial.println("w - Welcome message and system version");
+        Serial.println("p - Print actual analog value");
+        Serial.println("");
       } else {
-        Serial.println("I don't know, what '" + command"' command means."
+        Serial.print("I don't know, what '");
+        Serial.print(command);
+        Serial.print("' command means.");
       }
     }
   }
-        
-  if (readString.length() > 0) {
-    if (readString == "a"
-    readString="";
-  } 
-/*
-  // read the input on analog pin 0:
-  int sensorValue = analogRead(A0);
-  int digiValue = digitalRead(SensorINPUT);
-  // print out the value you read:
-  Serial.println(sensorValue);
-  delay(1);        // delay in between reads for stability
-*/
+  delay(1);
 }
