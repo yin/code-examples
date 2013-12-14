@@ -1,0 +1,14 @@
+  <div>
+    <h4>Uzivatelia</h4>
+    <div ng-repeat="user in getVisibleUsers()" class="block">
+      {{user.name}}: 
+      <span ng-repeat="role in user.roles">{{role}}</span>
+    </div>
+    <hr/>
+    <form ng-submit="add()">
+      <input type="text" ng-model="name" placeholder="Pridate uzivatela">
+      <br>
+      <input class="btn-primary" type="submit" value="Pridat">
+    </form>
+  </div>
+

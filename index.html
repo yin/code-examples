@@ -3,6 +3,7 @@
   <head>
     <!-- Thanks to http://angularjs.org/ -->
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.4/angular-route.min.js"></script>
     <script src="tabs.js"></script>
     <script src="books.js"></script>
     <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.3/css/bootstrap.min.css" rel="stylesheet">
@@ -13,63 +14,15 @@
   <body>
     <h2>Kniznica</h2>
     <h3>Zaklady Softveroveho Inzinierstva</h4>
-    <tabs>
-      <pane title="Knihy">
-        <div ng-controller="BooksCtrl">
-          <h4>{{books.length}} knih v kniznici:</h4>
-          <div ng-repeat="book in books" class="bookblock">
-            {{book.name}} - {{book.year}} - {{book.author}}
-          </div>
-          <hr/>
-          <h3>Pridat Knihu:</h3>
-          <form ng-submit="add()">
-            <label>Nazov:</label>
-            <input type="text" ng-model="bookName" placeholder="Nazov knihy">
-            <br>
-            <label>Autor:</label>
-            <input type="text" ng-model="author">
-            <br>
-            <label>Rok vydania:</label>
-            <input type="text" ng-model="year">
-            <br>
-            <label>Pocet kusov:</label>
-            <input type="text" ng-model="count">
-            <br>
-            <input class="btn-primary" type="submit" value="add">
-          </form>
-        </div>
-      </pane>
-      <pane title="Podla autorov">
-        <h4>Knihy podla autorov:</h4>
-      </pane>
-      <pane title="Vypozicky">
-        <h4>Vypozicky:</h4>
-      </pane>
-      <pane title="Uzivatelia">
-        <h4>Uzivatelia</h4>
-        <div ng-controller="UsersCtrl">
-          <div ng-repeat="user in getVisibleUsers()" class="block">
-            {{user.name}}: 
-            <span ng-repeat="role in user.roles">{{role}}</span>
-          </div>
-          <hr/>
-          <form ng-submit="add()">
-            <input type="text" ng-model="name" placeholder="Pridate uzivatela">
-            <br>
-            <input class="btn-primary" type="submit" value="Pridat">
-          </form>
-        </div>
-      </pane>
-      <pane title="Login">
-        <h4>Login</h4>
-        <div ng-controller="LoginCtrl">
-          <a href ng-repeat="logger in getUsers()" ng-click="loginAs(logger)" class="block">
-            Login as: {{user.name}}
-            (<span ng-repeat="role in logger.roles">{{role}}</span>)
-          </a>
-        </div>
-      </pane>
-    </tabs>
+    <a href="#books">Knihy</a>
+    <ul class="nav nav-tabs">
+      <li><a href="#books" data-toggle="tab">Knihy</a></li>
+      <li><a href="#autors" data-toggle="tab">Autori</a></li>
+      <li><a href="#checkouts" data-toggle="tab">Vypozicky</a></li>
+      <li><a href="#users" data-toggle="tab">Uzivatelia</a></li>
+      <li><a href="#login" data-toggle="tab">Login</a></li>
+    </ul>
+     <div ng-view></div>
   </body>
 </html>
 
