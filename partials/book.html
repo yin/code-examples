@@ -6,7 +6,12 @@
 
     <ul ng-show="isBooker() && book().avail > 0">
       <li ng-repeat="user in users()">
-        Vypozicat: <a href ng-click="borrowBook(user.id, book().id)">{{user.name}}</a>
+        <span ng-show="!isBorrowed(user.id, book().id)">
+          Vypozicat: <a href ng-click="borrowBook(user.id, book().id)">{{user.name}}</a>
+        </span>
+        <span ng-show="isBorrowed(user.id, book().id)">
+          Vratit: <a href ng-click="returnBook(user.id, book().id)">{{user.name}}</a>
+        </span>
       </li>
     </ul>
 

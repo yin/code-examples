@@ -58,21 +58,26 @@ angular.module('controllers', [])
           return;
         } else {
           book.avail--;
-          books.update(book);
           couts.add(user, book);
         }
       };
     };
-    $scope.returnBook = function(userId, bookID) {
+    $scope.returnBook = function(userId, bookId) {
       var co = couts.remove(userId, bookId);
-      if (co != null) {
+      if (co == null) {
         //TODO: Message
         alert('Vypozicka neexistuje');
         return;
+      } else {
+        var book = books.get(bookId);
+        book.avail++;
       }
     };
     $scope.users = function() {
       return users.getVisibleUsers();
+    };
+    $scope.isBorrowed = function(userId, bookId) {
+      return couts.find(userId, bookId) != null;
     };
     $scope.isReader = function() {
       return users.hasUserRole('reader');
@@ -161,7 +166,7 @@ angular.module('controllers', [])
         for (var i = 0, l=_glob_checkouts.length; i < l; i++) {
           var co = _glob_checkouts[i];
           if (co.userId == userId && co.bookId == bookId) {
-            _glob_checkouts.remove(i);
+            _glob_checkouts.splice(i);
             return co;
           }
         }

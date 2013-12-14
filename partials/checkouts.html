@@ -1,6 +1,9 @@
 <div>
   <ul>
-    <li ng-repeat="co in getCOs()">{{co.user.name}}: {co.book.name}}</li>
+    <li ng-repeat="co in getCOs()">
+      <a href="#/users">{{co.user.name}}:</a>
+      <a href="#/book/{{co.bookId}}">{{co.book.name}}</a>
+    </li>
   </ul>
 </div>
 
