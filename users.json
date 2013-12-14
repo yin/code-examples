@@ -1,0 +1,27 @@
+[    	{id:0,
+ name: "admin",
+ roles: ["admin"]},
+
+    	{id:1,
+ name: "gabko",
+ roles: ["booker",
+ "tester"]},
+
+    	{id:2,
+ name: "matko",
+ roles: ["reader",
+ "developer"]},
+
+    	{id:3,
+ name: "profak",
+ roles: ["tester"]},
+
+    	{id:4,
+ name: "gabko-real",
+ roles: ["booker"]},
+
+    	{id:5,
+ name: "matko-real",
+ roles: ["reader"]},
+
+]
