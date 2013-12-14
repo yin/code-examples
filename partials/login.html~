@@ -1,8 +1,0 @@
-  <div>
-    <h4>Login</h4>
-    <a href ng-repeat="logger in getUsers()" ng-click="loginAs(logger)" class="block">
-      Login as: {{user.name}}
-      (<span ng-repeat="role in logger.roles">{{role}}</span>)
-    </a>
-  </div>
-
