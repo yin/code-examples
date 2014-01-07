@@ -121,7 +121,7 @@ void stopReading() {
 }
 
 void welcome() {
-  Serial.print("Welcome, I am Arduino - The automatic meassurement system ");
+  Serial.print("Welcome, I am Arduino - The automatic measurement system ");
   Serial.print(VERSION);
   Serial.println(".");
 }
