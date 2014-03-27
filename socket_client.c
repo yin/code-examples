@@ -24,23 +24,17 @@
 
 #define IPC_HEADER "ipc"
 
-#define ERR_FNCTL   1
-#define ERR_CONNECT 2
+#define ERR_SOCKET   1
+#define ERR_CONNECT  2
+#define ERR_REQUEST  3
+#define ERR_RESPONSE 4
 
 char* socket_path = "./reverse.sock";
 int sockfd;
-struct ev_loop *main_loop;
-
-static void cleanup();
-static void handle_signal(int sig, siginfo_t *info, void *data);
-
-void ipc_new_client(EV_P_ struct ev_io *w, int revents);
-void ipc_receive_message(EV_P_ struct ev_io *w, int revents);
-void handle_message(int fd, int len, char* msg);
-void ipc_send_message(int fd, int len, char* msg);
+//struct ev_loop *main_loop;
 
 int main(int argc, char** argv) {
-  struct sockaddr_un local;
+  struct sockaddr_un addr;
 
   sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
   if (sockfd < 0) {
@@ -52,21 +46,22 @@ int main(int argc, char** argv) {
 
   addr.sun_family = AF_LOCAL;
   strcpy(addr.sun_path, socket_path);
-  int len = sizeof(local.sun_family) + strlen(local.sun_path);
+  int len = sizeof(addr.sun_family) + strlen(addr.sun_path);
   if (connect(sockfd, (struct sockaddr*) &addr, len) < 0) {
-    perror(stderr, "Could not bind() socket");
+    perror("Could not bind() socket");
     return ERR_CONNECT;
   }
 
   while(!feof(stdin)) {
-    char line[MAX_LINE_LEN];
-    fgets(line, MAX_LINE_LEN, stdin);
-    int msg_size = strlen(line);
+    char *line = NULL;
+    int msg_size = getline(&line, NULL, stdin);
     int sent_bytes = 0;
+    fprintf(stderr, "sending %d bytes: %s", msg_size, line);
     while(sent_bytes < msg_size) {
-      int n = write(sockfd, line + sent_bytes, msg_size - bytes_sent);
+      int n = write(sockfd, line + sent_bytes, msg_size - sent_bytes);
+      fprintf(stderr, "sent %d/%d bytes", sent_bytes+n, msg_size);
       if (n == 0) {
-        perror("Could not send message");
+        fprintf(stderr, "Could not send message, because socket seems closed.\n");
         return ERR_REQUEST;
       }
       if (n == -1) {
@@ -83,7 +78,7 @@ int main(int argc, char** argv) {
     while(read_bytes < to_read) {
       int n = read(sockfd, line, to_read);
       if (n == 0) {
-        perror("Could not receive response, premature end of stream");
+        fprintf(stderr, "Could not receive response, premature end of stream.\n");
         return ERR_RESPONSE;
       }
       if (n == -1) {

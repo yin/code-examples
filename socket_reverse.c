@@ -24,8 +24,8 @@
 
 #define IPC_HEADER "ipc"
 
-#define ERR_CONNECT 1
-#define ERR_FNCTL   2
+#define ERR_SOCKET 1
+#define ERR_FCNTL   2
 #define ERR_BIND    3
 #define ERR_LISTEN  4
 #define ERR_ACCEPT  5
@@ -84,7 +84,7 @@ int main(int argc, char** argv) {
   }
 
   if (listen(sockfd, 5) < 0) {
-    perror(stderr, "Could not listen() socket");
+    perror("Could not listen() socket");
     return ERR_LISTEN;
   }
 
@@ -159,7 +159,7 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
   flags |= (O_NONBLOCK);
   if (fcntl(sockfd, F_SETFL, flags) < 0) {
     perror("Could not set O_NONBLOCK and O_CLOEXEC");
-    exit(ERR_FNCTL);
+    exit(ERR_FCNTL);
   }
 
   struct ev_io *package = malloc(sizeof(struct ev_io));
@@ -189,7 +189,7 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
       return;
     }
     if (n == 0) {
-      fprintf(stderr, "Received premature end of message.");
+      fprintf(stderr, "Received premature end of message.\n");
       return;
     }
     read_bytes += n;
@@ -207,11 +207,11 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
       if (errno == EINTR || errno == EAGAIN) {
         continue;
       }
-      perror(stderr, "Could not receive message from client.");
+      perror("Could not receive message from client.");
       return;
     }
     if (n == 0) {
-      fprintf(stderr, "Received premature end of message.");
+      fprintf(stderr, "Received premature end of message.\n");
       return;
     }
     read_bytes += n;
