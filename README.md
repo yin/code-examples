@@ -23,8 +23,10 @@ Terminal 1:
 
     ./socket_reverse
 
+![Server will listen](https://raw.github.com/yin/libev-examples/master/docs/images/screenshot-libev-sockets-server.png)
+
 Terminal 2:
 
     echo -n 'Hello world!' | ./socket_client
 
-![Response: !dlrow olleH](https://raw.github.com/yin/libev-examples/master/docs/images/screenshot-libev-sockets.png)
+![Response: !dlrow olleH](https://raw.github.com/yin/libev-examples/master/docs/images/screenshot-libev-sockets-client.png)
