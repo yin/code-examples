@@ -1,8 +1,7 @@
 CC=gcc
-CFLAGS=-c -Wall
-LDFLAGS=
+CFLAGS=-c -Wall -std=gnu99
+LDFLAGS=-lev
 SOURCES=socket_reverse.c
-LIBS=ev
 OBJECTS=$(SOURCES:.c=.o)
 EXECUTABLES=$(SOURCES:.c=)
 # NOTE(yin): pkg-config is usable only if you have Xorg installed

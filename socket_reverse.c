@@ -1,15 +1,34 @@
+/**
+ * Demonstration of libev framework - Event-driven programming.
+ * This program is a UNIX Socket IPC server which uses simple protocol reverses
+ * each message and send it back as response to the client.
+ *
+ * The protocol, requests:
+ * IPC_EADER(string) | 32bit msg_len | msg
+ * 
+ * Responses are just raw bytes from msg in reversed order, for the moment.
+ */
+
 #include <string.h>
+#include <stdlib.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <signal.h>
+#include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <sys/un.h>
 #include <fcntl.h>
+#include <errno.h>
 #include <ev.h>
 
-#define ERR_FNCTL   1
-#define ERR_BIND    2
-#define ERR_LISTEN  3
-#define ERR_ACCEPT  4
+#define IPC_HEADER "ipc"
+
+#define ERR_CONNECT 1
+#define ERR_FNCTL   2
+#define ERR_BIND    3
+#define ERR_LISTEN  4
+#define ERR_ACCEPT  5
 
 typedef struct llist_struct {
   union {
@@ -29,36 +48,43 @@ int sockfd;
 lhead clients;
 struct ev_loop *main_loop;
 
-int cleanup();
+static void cleanup();
+static void handle_signal(int sig, siginfo_t *info, void *data);
+
 void ipc_new_client(EV_P_ struct ev_io *w, int revents);
+void ipc_receive_message(EV_P_ struct ev_io *w, int revents);
 void handle_message(int fd, int len, char* msg);
 void ipc_send_message(int fd, int len, char* msg);
 
 int main(int argc, char** argv) {
-  struct sunaddr_un local;
+  struct sockaddr_un local;
 
   sockfd = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (sockfd < 0) {
+    perror("Could not create socket()");
+    return ERR_SOCKET;
+  }
 
-  fcntl(sockfd, F_SETFD, FD_CLOEXEC);
+  (void)fcntl(sockfd, F_SETFD, FD_CLOEXEC);
 
   local.sun_family = AF_LOCAL;
   strcpy(local.sun_path, socket_path);
   unlink(local.sun_path);
   int len = sizeof(local.sun_family) + strlen(local.sun_path);
   if (bind(sockfd, (struct sockaddr*) &local, len) < 0) {
-    fprintf(stderr, "Could not bind() socket.\n");
+    perror("Could not bind() socket");
     return ERR_BIND;
   }
 
   int flags = fcntl(sockfd, F_GETFL, 0);
   flags |= (O_NONBLOCK);
   if (fcntl(sockfd, F_SETFL, flags) < 0) {
-    fprintf(stderr, "Could not set O_NONBLOCK and O_CLOEXEC\n");
-    return ERR_FNCTL;
+    perror("Could not set O_NONBLOCK and O_CLOEXEC");
+    return ERR_FCNTL;
   }
 
   if (listen(sockfd, 5) < 0) {
-    fprintf(stderr, "Could not listen() socket.\n");
+    perror(stderr, "Could not listen() socket");
     return ERR_LISTEN;
   }
 
@@ -76,16 +102,13 @@ int main(int argc, char** argv) {
   action.sa_flags = SA_NODEFER | SA_RESETHAND | SA_SIGINFO;
   sigemptyset(&action.sa_mask);
 
-  if (!disable_signalhandler)
-    setup_signal_handler();
-  else {
-    /* Catch all signals with default action "Core", see signal(7) */
-    if (sigaction(SIGQUIT, &action, NULL) == -1 ||
-	sigaction(SIGILL, &action, NULL) == -1 ||
-	sigaction(SIGABRT, &action, NULL) == -1 ||
-	sigaction(SIGFPE, &action, NULL) == -1 ||
-	sigaction(SIGSEGV, &action, NULL) == -1)
-      ELOG("Could not setup signal handler");
+  /* Catch all signals with default action "Core", see signal(7) */
+  if (sigaction(SIGQUIT, &action, NULL) == -1 ||
+      sigaction(SIGILL, &action, NULL) == -1 ||
+      sigaction(SIGABRT, &action, NULL) == -1 ||
+      sigaction(SIGFPE, &action, NULL) == -1 ||
+      sigaction(SIGSEGV, &action, NULL) == -1) {
+    fprintf(stderr, "Could not setup signal handler");
   }
 
   /* Catch all signals with default action "Term", see signal(7) */
@@ -93,8 +116,9 @@ int main(int argc, char** argv) {
       sigaction(SIGINT, &action, NULL) == -1 ||
       sigaction(SIGALRM, &action, NULL) == -1 ||
       sigaction(SIGUSR1, &action, NULL) == -1 ||
-      sigaction(SIGUSR2, &action, NULL) == -1)
-    ELOG("Could not setup signal handler");
+      sigaction(SIGUSR2, &action, NULL) == -1) {
+    fprintf(stderr, "Could not setup signal handler");
+  }
 
   /* Ignore SIGPIPE to survive errors when an IPC client disconnects
    * while we are sending him a message */
@@ -105,10 +129,14 @@ int main(int argc, char** argv) {
   ev_loop(main_loop, 0);
 }
 
-int cleanup() {
+static void cleanup() {
 #if EV_VERSION_MAJOR >= 4
   ev_loop_destroy(main_loop);
 #endif
+}
+
+static void handle_signal(int sig, siginfo_t *info, void *data) {
+  raise(sig);
 }
 
 void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
@@ -118,20 +146,20 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
 
   if (client < 0) {
     if (errno == EINTR) {
-      fprintf(stderr, "Could not accept(), because of 'interruption!?'.\n");
+      perror("Could not accept(), because of interruption signal");
       return;
     }
-    fprintf(stderr, "Could not accept() socket connection.\n");
+    perror("Could not accept() socket connection");
     exit(ERR_ACCEPT);
   }
 
-  fcntl(sockfd, F_SETFD, FD_CLOEXEC);
+  (void)fcntl(sockfd, F_SETFD, FD_CLOEXEC);
 
   int flags = fcntl(sockfd, F_GETFL, 0);
   flags |= (O_NONBLOCK);
   if (fcntl(sockfd, F_SETFL, flags) < 0) {
-    fprintf(stderr, "Could not set O_NONBLOCK and O_CLOEXEC\n");
-    return ERR_FNCTL;
+    perror("Could not set O_NONBLOCK and O_CLOEXEC");
+    exit(ERR_FNCTL);
   }
 
   struct ev_io *package = malloc(sizeof(struct ev_io));
@@ -140,7 +168,7 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
   printf("New client connected.\n");
 
   if(clients.first == NULL) {
-    clients.fisrt = clients.last = malloc(sizeof(llist));
+    clients.first = clients.last = malloc(sizeof(llist));
   } else {
     clients.last->next = malloc(sizeof(llist));
     clients.last = clients.last->next;
@@ -150,17 +178,19 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
 
 void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
   int head_len = strlen(IPC_HEADER);
-  int to_read = head_len + sizeof(uin32_t);
+  int to_read = head_len + sizeof(uint32_t);
   int read_bytes = 0;
   char* msg = malloc(to_read);
   
   while (read_bytes < to_read) {
     int n = read(w->fd, msg + read_bytes, to_read - read_bytes);
     if (n == -1) {
-      fprintf(stderr, "Could not receive message from client.");
+      perror("Could not receive message from client");
+      return;
     }
     if (n == 0) {
       fprintf(stderr, "Received premature end of message.");
+      return;
     }
     read_bytes += n;
   }
@@ -174,10 +204,15 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
   while (read_bytes < to_read) {
     int n = read(w->fd, msg + read_bytes, to_read - read_bytes);
     if (n == -1) {
-      fprintf(stderr, "Could not receive message from client.");
+      if (errno == EINTR || errno == EAGAIN) {
+        continue;
+      }
+      perror(stderr, "Could not receive message from client.");
+      return;
     }
     if (n == 0) {
       fprintf(stderr, "Received premature end of message.");
+      return;
     }
     read_bytes += n;
   }
@@ -200,7 +235,7 @@ void ipc_send_message(int fd, int len, char* msg) {
   int sent_bytes = 0;
   // TODO(yin): Add IPC_HEADER also to the response
   while (sent_bytes < msg_size) {
-    int n = write(fs, msg + sent_bytes, msg_size - sent_bytes);
+    int n = write(fd, msg + sent_bytes, msg_size - sent_bytes);
     if (n == -1) {
       if (errno == EAGAIN) {
 	continue;
