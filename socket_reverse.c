@@ -224,7 +224,7 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
   }
   if (memcmp(msg, IPC_HEADER, head_len) != 0) {
     fprintf(stderr, "IPC message has wrong HEADER.\n");
-    write (1, msg, read);
+    write (1, msg, read_bytes);
     printf("\n");
   }
   to_read = *((uint32_t*)(msg + head_len));
@@ -255,7 +255,7 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
 }
 
 void handle_message(int fd, int len, char* msg) {
-  printf("Request (len:%d): ", len, msg[0], msg[1], msg[2]);
+  printf("Request (len:%d): ", len);
   write(1, msg, len);
   printf("\n");
   for(int i = 0; i < len / 2; i++) {
