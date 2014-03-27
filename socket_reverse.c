@@ -52,6 +52,7 @@ static void cleanup();
 static void handle_signal(int sig, siginfo_t *info, void *data);
 
 void ipc_new_client(EV_P_ struct ev_io *w, int revents);
+void close_client(int fd);
 void ipc_receive_message(EV_P_ struct ev_io *w, int revents);
 void handle_message(int fd, int len, char* msg);
 void ipc_send_message(int fd, int len, char* msg);
@@ -176,6 +177,29 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
   clients.last->i = client;
 }
 
+void close_client(int fd) {
+  llist *prev = NULL;
+  llist *cur = clients.first;
+  while (cur != NULL) {
+    if (cur->i == fd) {
+      if (cur == clients.first) {
+        clients.first = cur->next;
+      }
+      if (cur == clients.last) {
+        clients.last = prev;
+      }
+      if (prev != NULL) {
+        prev->next = cur->next;
+      }
+      free(cur);
+    }
+    prev = cur;
+    cur = cur->next;
+  }
+  // TODO(yin): check if we ever had client with this fd
+  close(fd);
+}
+
 void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
   int head_len = strlen(IPC_HEADER);
   int to_read = head_len + sizeof(uint32_t);
@@ -183,35 +207,45 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
   char* msg = malloc(to_read);
   
   while (read_bytes < to_read) {
+    fprintf(stderr, "Receiving header (%d bytes)...\n", to_read-read_bytes);
     int n = read(w->fd, msg + read_bytes, to_read - read_bytes);
+    fprintf(stderr, "received %d bytes (%d total)\n", n, read_bytes+n);
     if (n == -1) {
       perror("Could not receive message from client");
+      close_client(w->fd);
       return;
     }
     if (n == 0) {
       fprintf(stderr, "Received premature end of message.\n");
+      close_client(w->fd);
       return;
     }
     read_bytes += n;
   }
   if (memcmp(msg, IPC_HEADER, head_len) != 0) {
-    fprintf(stderr, "IPC message has wrong HEADER.");
+    fprintf(stderr, "IPC message has wrong HEADER.\n");
+    write (1, msg, read);
+    printf("\n");
   }
   to_read = *((uint32_t*)(msg + head_len));
   read_bytes = 0;
   free(msg);
   msg = malloc(to_read);
+  fprintf(stderr, "Receiving message...\n");
   while (read_bytes < to_read) {
     int n = read(w->fd, msg + read_bytes, to_read - read_bytes);
+    fprintf(stderr, "received %d bytes\n", n);
     if (n == -1) {
       if (errno == EINTR || errno == EAGAIN) {
         continue;
       }
       perror("Could not receive message from client.");
+      close_client(w->fd);
       return;
     }
     if (n == 0) {
       fprintf(stderr, "Received premature end of message.\n");
+      close_client(w->fd);
       return;
     }
     read_bytes += n;
@@ -221,12 +255,18 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
 }
 
 void handle_message(int fd, int len, char* msg) {
+  printf("Request (len:%d): ", len, msg[0], msg[1], msg[2]);
+  write(1, msg, len);
+  printf("\n");
   for(int i = 0; i < len / 2; i++) {
-    int j = len - i;
+    int j = len - i - 1;
     msg[j] ^= msg[i];
     msg[i] ^= msg[j];
     msg[j] ^= msg[i];
   }
+  printf("Response (len:%d): ", len);
+  write(1, msg, len);
+  printf("\n");
   ipc_send_message(fd, len, msg);
 }
 
@@ -235,7 +275,9 @@ void ipc_send_message(int fd, int len, char* msg) {
   int sent_bytes = 0;
   // TODO(yin): Add IPC_HEADER also to the response
   while (sent_bytes < msg_size) {
+    fprintf(stderr, "Sending %d bytes: %s\n", msg_size, msg);
     int n = write(fd, msg + sent_bytes, msg_size - sent_bytes);
+    fprintf(stderr, "sent %d/%d bytes\n", sent_bytes+n, msg_size);
     if (n == -1) {
       if (errno == EAGAIN) {
 	continue;
