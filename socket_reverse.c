@@ -15,6 +15,7 @@
 #include <stdint.h>
 #include <signal.h>
 #include <unistd.h>
+#include <sys/queue.h>
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <sys/un.h>
@@ -30,22 +31,14 @@
 #define ERR_LISTEN  4
 #define ERR_ACCEPT  5
 
-typedef struct llist_struct {
-  union {
-    int i;
-    void *p;
-  };
-  struct llist_struct *next;
-} llist;
-
-typedef struct lhead_struct {
-  llist* first;
-  llist* last;
-} lhead;
+typedef struct ipc_client {
+  int fd;
+  TAILQ_ENTRY(ipc_client) next;
+} ipc_client;
 
 char* socket_path = "./reverse.sock";
 int sockfd;
-lhead clients;
+TAILQ_HEAD(ipc_clients_head, ipc_client) ipc_clients = TAILQ_HEAD_INITIALIZER(ipc_clients);
 struct ev_loop *main_loop;
 
 static void cleanup();
@@ -88,8 +81,6 @@ int main(int argc, char** argv) {
     perror("Could not listen() socket");
     return ERR_LISTEN;
   }
-
-  clients.first = clients.last = NULL;
 
   main_loop = EV_DEFAULT;
 
@@ -143,9 +134,9 @@ static void handle_signal(int sig, siginfo_t *info, void *data) {
 void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
   struct sockaddr_un peer;
   socklen_t len = sizeof(struct sockaddr_un);
-  int client = accept(w->fd, (struct sockaddr*) &peer, &len);
+  int clientfd = accept(w->fd, (struct sockaddr*) &peer, &len);
 
-  if (client < 0) {
+  if (clientfd < 0) {
     if (errno == EINTR) {
       perror("Could not accept(), because of interruption signal");
       return;
@@ -164,37 +155,21 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
   }
 
   struct ev_io *package = malloc(sizeof(struct ev_io));
-  ev_io_init(package, ipc_receive_message, client, EV_READ);
+  ev_io_init(package, ipc_receive_message, clientfd, EV_READ);
   ev_io_start(EV_A_ package);
-  printf("New client connected.\n");
+  printf("new-client(fd:%d)\n", clientfd);
 
-  if(clients.first == NULL) {
-    clients.first = clients.last = malloc(sizeof(llist));
-  } else {
-    clients.last->next = malloc(sizeof(llist));
-    clients.last = clients.last->next;
-  }
-  clients.last->i = client;
+  ipc_client *client = malloc(sizeof(ipc_client));
+  client->fd = clientfd;
+  TAILQ_INSERT_TAIL(&ipc_clients, client, next);
 }
 
 void close_client(int fd) {
-  llist *prev = NULL;
-  llist *cur = clients.first;
-  while (cur != NULL) {
-    if (cur->i == fd) {
-      if (cur == clients.first) {
-        clients.first = cur->next;
-      }
-      if (cur == clients.last) {
-        clients.last = prev;
-      }
-      if (prev != NULL) {
-        prev->next = cur->next;
-      }
-      free(cur);
+  ipc_client *current;
+  TAILQ_FOREACH(current, &ipc_clients, next) {
+    if (current->fd == fd) {
+      TAILQ_REMOVE(&ipc_clients, current, next);
     }
-    prev = cur;
-    cur = cur->next;
   }
   // TODO(yin): check if we ever had client with this fd
   close(fd);
