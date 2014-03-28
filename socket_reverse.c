@@ -36,9 +36,18 @@ typedef struct ipc_client {
   TAILQ_ENTRY(ipc_client) next;
 } ipc_client;
 
+typedef struct message {
+  void (*handler)(struct message* msg);
+  ipc_client *origin;
+  size_t length;
+  char *data;
+  TAILQ_ENTRY(message) next;
+} message;
+
 char* socket_path = "./reverse.sock";
 int sockfd;
 TAILQ_HEAD(ipc_clients_head, ipc_client) ipc_clients = TAILQ_HEAD_INITIALIZER(ipc_clients);
+TAILQ_HEAD(messages_head, message) messages = TAILQ_HEAD_INITIALIZER(messages);
 struct ev_loop *main_loop;
 
 static void cleanup();
@@ -47,8 +56,11 @@ static void handle_signal(int sig, siginfo_t *info, void *data);
 void ipc_new_client(EV_P_ struct ev_io *w, int revents);
 void close_client(int fd);
 void ipc_receive_message(EV_P_ struct ev_io *w, int revents);
-void handle_message(int fd, int len, char* msg);
-void ipc_send_message(int fd, int len, char* msg);
+void schedule_message(ipc_client *origin, size_t len, char* data);
+void check_messages_cb(EV_P_ ev_check *W, int revents);
+void ipc_send_message(message *msg);
+ipc_client* get_client_by_fd(int fd);
+void set_nonblock(int fd);
 
 int main(int argc, char** argv) {
   struct sockaddr_un local;
@@ -70,12 +82,7 @@ int main(int argc, char** argv) {
     return ERR_BIND;
   }
 
-  int flags = fcntl(sockfd, F_GETFL, 0);
-  flags |= (O_NONBLOCK);
-  if (fcntl(sockfd, F_SETFL, flags) < 0) {
-    perror("Could not set O_NONBLOCK and O_CLOEXEC");
-    return ERR_FCNTL;
-  }
+  set_nonblock(sockfd);
 
   if (listen(sockfd, 5) < 0) {
     perror("Could not listen() socket");
@@ -87,6 +94,10 @@ int main(int argc, char** argv) {
   struct ev_io *ipc_io = malloc(sizeof(struct ev_io));
   ev_io_init(ipc_io, ipc_new_client, sockfd, EV_READ);
   ev_io_start(main_loop, ipc_io);
+
+  struct ev_check *message_check = malloc(sizeof(ev_check));
+  ev_check_init(message_check, check_messages_cb);
+  ev_check_start(main_loop, message_check);
 
   struct sigaction action;
 
@@ -146,13 +157,7 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents) {
   }
 
   (void)fcntl(sockfd, F_SETFD, FD_CLOEXEC);
-
-  int flags = fcntl(sockfd, F_GETFL, 0);
-  flags |= (O_NONBLOCK);
-  if (fcntl(sockfd, F_SETFL, flags) < 0) {
-    perror("Could not set O_NONBLOCK and O_CLOEXEC");
-    exit(ERR_FCNTL);
-  }
+  set_nonblock(sockfd);
 
   struct ev_io *package = malloc(sizeof(struct ev_io));
   ev_io_init(package, ipc_receive_message, clientfd, EV_READ);
@@ -181,6 +186,7 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
   int read_bytes = 0;
   char* msg = malloc(to_read);
   
+  fprintf(stderr, "reading message\n");
   while (read_bytes < to_read) {
     fprintf(stderr, "Receiving header (%d bytes)...\n", to_read-read_bytes);
     int n = read(w->fd, msg + read_bytes, to_read - read_bytes);
@@ -205,7 +211,7 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
   to_read = *((uint32_t*)(msg + head_len));
   read_bytes = 0;
   free(msg);
-  msg = malloc(to_read);
+  msg = malloc(to_read + 1);
   fprintf(stderr, "Receiving message...\n");
   while (read_bytes < to_read) {
     int n = read(w->fd, msg + read_bytes, to_read - read_bytes);
@@ -225,40 +231,75 @@ void ipc_receive_message(EV_P_ struct ev_io *w, int revents) {
     }
     read_bytes += n;
   }
-  
-  handle_message(w->fd, to_read, msg);
+  msg[to_read] = 0;
+  schedule_message(get_client_by_fd(w->fd), to_read, msg);
+  fprintf(stderr, "message sheduled for handling...\n");
+  check_messages_cb(NULL, NULL, 0);
 }
 
-void handle_message(int fd, int len, char* msg) {
-  printf("Request (len:%d): ", len);
-  write(1, msg, len);
-  printf("\n");
-  for(int i = 0; i < len / 2; i++) {
-    int j = len - i - 1;
-    msg[j] ^= msg[i];
-    msg[i] ^= msg[j];
-    msg[j] ^= msg[i];
+void schedule_message(ipc_client *origin, size_t len, char* data) {
+  if (origin == NULL) {
+    return;
   }
-  printf("Response (len:%d): ", len);
-  write(1, msg, len);
-  printf("\n");
-  ipc_send_message(fd, len, msg);
+  message *msg = malloc(sizeof(message));
+  msg->origin = origin;
+  msg->length = len;
+  msg->data = data;
+  TAILQ_INSERT_TAIL(&messages, msg, next);
 }
 
-void ipc_send_message(int fd, int len, char* msg) {
-  int msg_size = len;
+void check_messages_cb(EV_P_ ev_check *w, int revents) {
+  // Pop one message per invokation and handle it
+  fprintf(stderr, "check-msg\n");
+  if (!TAILQ_EMPTY(&messages)) {
+    message *msg = TAILQ_FIRST(&messages);
+    printf("Request (len:%d): %s\n", (int)msg->length, msg->data);
+    for(int i = 0; i < msg->length / 2; i++) {
+      int j = msg->length - i - 1;
+      msg->data[j] ^= msg->data[i];
+      msg->data[i] ^= msg->data[j];
+      msg->data[j] ^= msg->data[i];
+    }
+    printf("Response (len:%d): %s\n", (int)msg->length, msg->data);
+    ipc_send_message(msg);
+  }
+}
+
+void ipc_send_message(message *msg) {
+  int msg_size = msg->length;
   int sent_bytes = 0;
   // TODO(yin): Add IPC_HEADER also to the response
   while (sent_bytes < msg_size) {
-    fprintf(stderr, "Sending %d bytes: %s\n", msg_size, msg);
-    int n = write(fd, msg + sent_bytes, msg_size - sent_bytes);
+    fprintf(stderr, "Sending %d bytes: %s\n", msg_size, msg->data);
+    int n = write(msg->origin->fd, msg->data + sent_bytes, msg_size - sent_bytes);
     fprintf(stderr, "sent %d/%d bytes\n", sent_bytes+n, msg_size);
     if (n == -1) {
       if (errno == EAGAIN) {
 	continue;
       }
-      fprintf(stderr, "Could not send response to client.\n");
+      fprintf(stderr, "Could not send respond to client(fd:%d).\n", msg->origin->fd);
+      close_client(msg->origin->fd);
+      return;
     }
     sent_bytes += n;
+  }
+}
+
+ipc_client *get_client_by_fd(int fd) {
+  ipc_client *current;
+  TAILQ_FOREACH(current, &ipc_clients, next) {
+    if (current->fd == fd) {
+      return current;
+    }
+  }
+  return NULL;
+}
+
+void set_nonblock(int fd) {
+  int flags = fcntl(fd, F_GETFL, 0);
+  flags |= (O_NONBLOCK);
+  if (fcntl(fd, F_SETFL, flags) < 0) {
+    perror("Could not set O_NONBLOCK and O_CLOEXEC");
+    exit(ERR_FCNTL);
   }
 }
