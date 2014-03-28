@@ -105,6 +105,7 @@ int main(int argc, char** argv) {
     }
     printf("Response: %s\n", line);
   }
+  close(sockfd);
   /*
   main_loop = EV_DEFAULT;
 

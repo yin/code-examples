@@ -57,6 +57,7 @@ void ipc_new_client(EV_P_ struct ev_io *w, int revents);
 void close_client(int fd);
 void ipc_receive_message(EV_P_ struct ev_io *w, int revents);
 void schedule_message(ipc_client *origin, size_t len, char* data);
+void prepare_messages_cb(EV_P_ ev_prepare *w, int revents);
 void check_messages_cb(EV_P_ ev_check *W, int revents);
 void ipc_send_message(message *msg);
 ipc_client* get_client_by_fd(int fd);
@@ -98,6 +99,10 @@ int main(int argc, char** argv) {
   struct ev_check *message_check = malloc(sizeof(ev_check));
   ev_check_init(message_check, check_messages_cb);
   ev_check_start(main_loop, message_check);
+
+  struct ev_prepare *message_prepare = malloc(sizeof(ev_prepare));
+  ev_prepare_init(message_prepare, prepare_messages_cb);
+  ev_prepare_start(main_loop, message_prepare);
 
   struct sigaction action;
 
@@ -246,6 +251,10 @@ void schedule_message(ipc_client *origin, size_t len, char* data) {
   msg->length = len;
   msg->data = data;
   TAILQ_INSERT_TAIL(&messages, msg, next);
+}
+
+void prepare_messages_cb(EV_P_ ev_prepare *w, int revents) {
+  fprintf(stderr, "prepare_messages_cb()\n");
 }
 
 void check_messages_cb(EV_P_ ev_check *w, int revents) {
