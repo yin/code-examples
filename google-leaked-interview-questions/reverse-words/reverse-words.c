@@ -20,7 +20,6 @@ int main(int argc, char** argv) {
 void reverse_words_inplace(char *s) {
   int len = strlen(s);
   reverse_string_inplace(s, len);
-  printf("%s\n", s);
   for(int a = 0, b = 0; b <= len; b++) {
     if (b == len || s[b] == ' ') {
       reverse_string_inplace(s+a, b-a);
