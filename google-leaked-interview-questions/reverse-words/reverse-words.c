@@ -11,9 +11,14 @@ int main(int argc, char** argv) {
   char *str = read_input();
   printf("Reverse words inplace\n");
   printf("input:  '%s'\n", str);
-  reverse_words_inplace(str);
-  printf("output: '%s'\n", str);
-  free(str);
+  if (str != NULL) {
+    reverse_words_inplace(str);
+    printf("output: '%s'\n", str);
+    free(str);
+  } else {
+    printf("Nothing at input, not running the algorithm.");
+    return 1;
+  }
   return 0;
 }
 
