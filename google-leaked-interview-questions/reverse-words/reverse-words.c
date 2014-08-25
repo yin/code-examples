@@ -3,6 +3,18 @@
 #include <string.h>
 #include <memory.h>
 
+// Problem description
+// ===================
+//
+// Given a string consiting of words delimited by single space, reverse the
+// order of the words in the string. Do it in place with no additional memory.
+//
+// Example
+// =======
+// 
+// Input : 'I see a tree'
+// Output: 'tree a see I'
+
 char* read_input();
 void reverse_words_inplace(char *input);
 void reverse_string_inplace(char *input, size_t len);
