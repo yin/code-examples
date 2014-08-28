@@ -5,53 +5,75 @@
 
 #define SIZE 256
 
+void on_line_read(char *line, void *payload);
+void read_all_input_lines(void (*callback)(char*, void*), void *payload);
+char* read_input_line();
 char* read_input();
+char* ensure_capacity(char *buffer, size_t len, size_t *alloc);
 
 int main(int argc, char** argv) {
-  char *input = read_input();
   printf("Read line of any size\n");
-  printf("input: '%s'\n", input);
+  char *input = read_input_line();
+  printf("first line: '%s' %d\n", input, (int)strlen(input));
+  read_all_input_lines(on_line_read, NULL);  
   free(input);
   return 0;
 }
 
-// This is supposed to read a line any length, terminated by zero.
-// Returns NULL if stdin is closed, or not enough memory
-// TODO(yin): This reads 0 bytes
-char* read_input() {
-  char *result = NULL, *buf;
-  size_t alloc = SIZE;
-  size_t len = 0;
-  printf("feof(stdin) is %d\n", feof(stdin));
-  while (!feof(stdin)) {
-    if (result == NULL) {
-      result = (char*) malloc(sizeof(char) * SIZE);
-      buf = result;
-    } else if (alloc - len < SIZE) {
-      result = (char*) realloc(result, alloc + SIZE);
-      alloc += SIZE;
-      buf = result + len;
-    }
-    if (result == NULL) {
-      fprintf(stderr, "Not enough memory");
-      return NULL;
-    }
+void on_line_read(char *line, void *payload) {
+  printf("line: '%s' %d\n", line, (int)strlen(line));
+  free(line);
+}
 
-    size_t read = fread(buf, SIZE, sizeof(char), stdin);
-    printf("just read %d characters.\n", (int) read);
-    len += read;
+// TODO yin: Add flow control function as optional 3rd argument
+void read_all_input_lines(void (*callback)(char*, void*), void *payload) {
+  while (!feof(stdin)) {
+  }
+}
+
+char* read_input_line() {
+  char *result = NULL, *buf;
+  size_t alloc = 0;
+  size_t len = 0;
+  while (!feof(stdin)) {
+    buf = result + len;
+    result = ensure_capacity(result, len, &alloc);
+    size_t read = 1;
+    if(gets(buf)) {
+      char c = buf[0];
+      printf("just read %d characters. '%c' %d\n", (int) read, c, (int) c);
+    } else {
+      fprintf(stderr, "Error reading stdin\n");
+      return result;
+    }
     for (int i = 0; i < read; i++) {
-      if (buf[i] == '\n' || buf[i] == 0) {
-        buf[i] = '\0';
+      if (buf[i] == 0) {
+        read = i;
+        break;
+      } else if (buf[i] == '\n') {
+        buf[i] = 0;
         return result;
       }
     }
-    printf("feof(stdin) is %d\n", feof(stdin));
-    
+    len += read;
   }
   if (len == alloc) {
     result = (char*) realloc(result, alloc + 1);
   }
-  result[len] = '\0';
+  result[len] = 0;
   return result;
+}
+
+char* ensure_capacity(char *buffer, size_t len, size_t *alloc) {
+    if (buffer == NULL) {
+      buffer = (char*) malloc(sizeof(char) * SIZE);
+    } else if (*alloc - len < SIZE) {
+      buffer = (char*) realloc(buffer, *alloc + SIZE);
+      *alloc += SIZE;
+    }
+    if (buffer == NULL) {
+      fprintf(stderr, "Not enough memory");
+      return NULL;
+    }
+    return buffer;
 }
