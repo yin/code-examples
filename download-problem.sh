@@ -12,7 +12,6 @@ curd=$(pwd)
 
 if [ ! -e $index ]; then
     mkdir -p $dir
-    echo wget http://codeforces.com/problemset/problem/$1/$2 -kp -H -nd -e robots=off -np -A jpg,jpeg,png,svg,gif,css, -P $dir
     wget http://codeforces.com/problemset/problem/$1/$2 -kp -H -nd -e robots=off -np -A jpg,jpeg,png,svg,gif,css, -P $dir >&2
     mv $dir/$2 $index
 fi
