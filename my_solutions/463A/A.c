@@ -10,11 +10,9 @@ int main() {
     scanf("%lld %lld\n", &a, &b);
     a = a*100 + b;
     if (s >= a) {
-      for (j = a; j <= s; j+=a) {
-        int ch = (100 - j % 100) % 100;
-        if (ch > max) {
-          max = ch;
-        }
+      int ch = (100 - b) % 100;
+      if (ch > max) {
+        max = ch;
       }
     }
   }
