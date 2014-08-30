@@ -19,7 +19,7 @@ int main() {
       }
     } else {
       if (min == a) {
-      min_c++;
+        min_c++;
       }
       if (max == a) {
         max_c++;
