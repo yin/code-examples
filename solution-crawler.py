@@ -87,7 +87,7 @@ class Crawler:
     def get_source(self, solution):
         content = self.fetch_submission(self.submission_url, solution['id'])
         data = json.loads(content)
-        source = str(data.get('source'))
+        source = data.get('source').encode('utf-8')
         return re.sub(r"(\r)?\n", "\n", source)
 
     def fetch_listing(self, url):
