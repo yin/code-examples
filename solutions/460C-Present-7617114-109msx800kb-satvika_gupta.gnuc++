@@ -1,0 +1,80 @@
+#include <iostream>
+#include <cstdio>
+#include <cstring>
+#include <algorithm>
+using namespace std;
+
+int n,w,m;
+int bit[100005];
+int arr[100005];
+
+void updatebit(int p, int val)
+{
+     int i = p;
+     while (i < 100005) {
+           bit[i] += val;
+           i += i & -i;      
+     }     
+}
+
+void update(int l, int r, int val)
+{
+     updatebit(r+1,-val);
+     updatebit(l,val);     
+}
+
+int get(int p)
+{
+     int i = p;
+     int sum = 0;
+     while (i > 0) {
+           sum += bit[i];
+           i -= i & -i;      
+     }     
+     return sum;
+}
+
+int check(int val)
+{
+    int days = m;
+    int range = w;
+    int k;
+    memset(bit,0,sizeof(bit));
+    int i;
+    for (i = 1; i <= n; i++) {
+        k = get(i);
+        if (arr[i] + k < val) {
+            if (val-(arr[i]+k) > days) {
+               return 0;                   
+            }           
+            days -= val - (arr[i]+k);
+            update(i,min(i+w-1,n),val-(arr[i]+k));
+        } 
+    } 
+    return 1;   
+}
+
+int main()
+{   
+    cin >> n >> m >> w;
+    int i;
+    for (i = 1; i <= n; i++) cin >> arr[i];
+    int l = 0;
+    int r = 2000000000;
+    int mid;
+    while (l+1 < r) {
+          mid = l+(r-l)/2;
+          if (check(mid)) {
+             l = mid;                
+          } else {
+            r = mid;      
+          }                                
+    } 
+    int ans;
+    for (i = l; i <= r; i++) {
+        if (check(i)) ans = i;     
+    }
+    cout << ans << endl;
+    //system("pause");
+    return 0;
+}
