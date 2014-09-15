@@ -12,11 +12,15 @@
 //
 // Solution
 // ========
-// We preproces the array A of size N, building up an matrix B of size NxlogN,
-// B[i][k] will contain the minimum element in interval A[i]..A[i+2^k].
+// We preproces the array A of size N, building up an matrix B of size
+// Nx(logN+1), B[i][k] will contain the minimum element in interval
+// A[i]..A[i+2^k].
 //
-// The most efficient way is said to be O(NlogN). The strait-forward way to do
-// it is O(N^2), that's what we'll use in our first implementation.
+// The strait-forward way to do it is O(N^2). The most efficient way is
+// O(NlogN) and uses dynamic programming: We fill the first row of B copying
+// all elements from A. Then for each next row j (from interval 1..k), we
+// compare i-th element with i+2^j element and fill the lower one into i-th
+// position.
 //
 // For each query Q(a, b), calculate a number k, where 2^k <= b-a < 2^(k+1).
 // Then we can query for minimums in two overlapping intevals B_a=B[a][k] and
@@ -55,7 +59,7 @@ int main(int argc, char** argv) {
   int N = argc - 1;
   int *A = (int*) malloc(sizeof(int) * N);
   int *B;
-  int a, b, k = log2(N);
+  int a, b, logN = log2(N);
   printf("A = [");
   int i;
   for (i = 1; i < argc; i++) {
@@ -65,7 +69,7 @@ int main(int argc, char** argv) {
   printf("]\n");
   B = preprocess_min(A, N);
   printf("B = [");
-  for (i = 0; i < N*k; i++) {
+  for (i = 0; i < N*(logN+1); i++) {
     if (i%N == 0 && i > 0) printf("\n     ");
     printf("%d, ", B[i]);
   }
@@ -87,15 +91,17 @@ int main(int argc, char** argv) {
 int* preprocess_min(int* A, int N) {
   int logN = log2(N);
   int *B = (int*)malloc(sizeof(int)*N*(logN+1));
-  for (int k = 0; k <= logN; k++) {
-    int exp2k = 1 << k;
+  for (int i = 0; i < N; i++) {
+    B[i] = A[i];
+  }
+  for (int k = 1; k <= logN; k++) {
+    int exp2k = 1 << (k-1);
     for (int i = 0; i < N; i++) {
-      // TODO yin: There's another way to be figured out, which takes O(NlogN)
-      int m = INT_MAX;
-      for (int j = 0; j < exp2k && i+j < N; j++) {
-        if (m > A[i+j]) m = A[i+j];
-      }
-      B[i+k*N] = m;
+      int i2 = i + exp2k;
+      int j = i+k*N;
+      int j2 = i2+k*N;
+      B[j] = B[j-N];
+      if (i2 < N && B[j] > B[j2-N]) B[j] = B[j2-N];
     }
   }
   return B;
