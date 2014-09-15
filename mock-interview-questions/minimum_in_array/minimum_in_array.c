@@ -18,7 +18,7 @@
 // The most efficient way is said to be O(NlogN). The strait-forward way to do
 // it is O(N^2), that's what we'll use in our first implementation.
 //
-// For each query Q(a, b), calculate a number k, where 2^k < b-a < 2^(k+1).
+// For each query Q(a, b), calculate a number k, where 2^k <= b-a < 2^(k+1).
 // Then we can query for minimums in two overlapping intevals B_a=B[a][k] and
 // B_b = B[b-k][k], which translate to A[a]..A[a+k] and A[b-k]..A[b]. The
 // minimum in A[a]..A[b] is then the lower of B_a and B_b.
@@ -55,7 +55,7 @@ int main(int argc, char** argv) {
   int N = argc - 1;
   int *A = (int*) malloc(sizeof(int) * N);
   int *B;
-  int a, b;
+  int a, b, k = log2(N);
   printf("A = [");
   int i;
   for (i = 1; i < argc; i++) {
@@ -64,6 +64,12 @@ int main(int argc, char** argv) {
   }
   printf("]\n");
   B = preprocess_min(A, N);
+  printf("B = [");
+  for (i = 0; i < N*k; i++) {
+    if (i%N == 0 && i > 0) printf("\n     ");
+    printf("%d, ", B[i]);
+  }
+  printf("]\n");
   while(!feof(stdin)) {
     int c = scanf("%d %d\n", &a, &b);
     if (c == 2) {
@@ -78,21 +84,16 @@ int main(int argc, char** argv) {
   return 0;
 }
 
-// TODO yin: Failing test case:
-// A = [5, 4, 3, 1, 2, 3, 6, 2, ]
-// Q(2, 6) = 2
-// Shoudl be 1
-
 int* preprocess_min(int* A, int N) {
   int logN = log2(N);
-  int *B = (int*)malloc(sizeof(int)*N*logN);
-  for (int k = 0; k < logN; k++) {
+  int *B = (int*)malloc(sizeof(int)*N*(logN+1));
+  for (int k = 0; k <= logN; k++) {
     int exp2k = 1 << k;
     for (int i = 0; i < N; i++) {
       // TODO yin: There's another way to be figured out, which takes O(NlogN)
       int m = INT_MAX;
       for (int j = 0; j < exp2k && i+j < N; j++) {
-        if (m > A[i]) m = A[i];
+        if (m > A[i+j]) m = A[i+j];
       }
       B[i+k*N] = m;
     }
@@ -101,14 +102,13 @@ int* preprocess_min(int* A, int N) {
 }
 
 int get_min(int *B, int N, int a, int b) {
-  int d = b - a;
+  int d = b - a + 1;
   if (d < 0) return INT_MAX;
   int k = log2(d);
   return B[a+k*N] < B[b-k+k*N] ? B[a+k*N] : B[b-k+k*N];
 }
 
 #ifndef __USE_ISOC99
-
 #define LOG2E 1.44269504088896340736 // log2(e)
 
 int log2(int N) {
