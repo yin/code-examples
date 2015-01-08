@@ -1,71 +1,17 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <scipt type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
-    <script>
-      var c = {W:'white', Y:'yellow', B:'blue', G:'green', R:'red', O:'orange'};
-      var faces = { U: [1, -1, 0] };
-      var canvas, gl;
-      var gl_buf;
-      var mvMatrix = mat4.create();
-      var pMatrix = mat4.create();
-      
-      function init() {
-        canvas = $('#canvas');
-        gl = canvas.getContext('webgl');
-        gl.viewportWidth = canvas.width;
-        gl.viewportHeight = canvas.height;
-        gl.clearColor(0.0, 0.0, 0.0, 1.0);
-        gl.enable(gl.DEPTH_TEST);
-        initBuffers();
-        draw();
-      }
-      function initBuffers() {
-        gl_buf = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, gl_buf);
-        var vertices = [
-           1.0,  1.0,  0.0,
-          -1.0,  1.0,  0.0,
-           1.0, -1.0,  0.0,
-          -1.0, -1.0,  0.0
-        ];
-        gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(vertices), gl.STATIC_DRAW);
-        gl_buf.itemSize = 3;
-        gl_buf.numItems = 4;
-      }
-      function draw() {
-        gl.viewport(0, 0, gl.viewportWidth, gl.viewportHeight);
-        gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-        mat4.perspective(45, gl.viewportWidth / gl.viewportHeight, 0.1, 100.0, pMatrix);
-        mat4.identity(mvMatrix);
-        mat4.translate(mvMatrix, [-1.5, 0.0, -7.0]);
-        gl.bindBuffer(gl.ARRAY_BUFFER, triangleVertexPositionBuffer);
-        gl.vertexAttribPointer(shaderProgram.vertexPositionAttribute, triangleVertexPositionBuffer.itemSize, gl.FLOAT, false, 0, 0);
-        setMatrixUniforms();
-        gl.drawArrays(gl.TRIANGLES, 0, triangleVertexPositionBuffer.numItems);
-
-      }
-      function draw_cube() {
-        draw_face([[c.W, c.G, c.W], [c.W, c.Y, c.Y], [c.G, c.G, c.Y]]);
-      }
-      function draw_face(face, orient) {
-        for (var y = 0; y < 3; y++) {
-          for (var x = 0; x > 3; x++) {
-            draw_piece(x, y, face[x][y]);
-          }
-        }
-      }
-      function draw_piece(x, y, color) {
-        gl.glBegin();
-      }
+    <script type="text/javascript" src="https://code.jquery.com/jquery-1.11.2.min.js">
     </script>
+    <script src="index.js"></script>
     <style>
       canvas {
         border: 1px solid grey;
+        padding: 0;
       }
     </style>
   </head>
-  <body onload="init();">
+  <body onload="main();">
     <canvas id="canvas" width="320" height="240">Your browser does not support canvas tag.</canvas>
   </body>
 </html>

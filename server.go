@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"io"
+//	"io"
 )
 
 type Color int
@@ -67,9 +67,11 @@ func main() {
 	fmt.Println("Cube: ", cube)
 	fmt.Println("Here we go.. starting server");
 	http.Handle("/", http.FileServer(http.Dir("static")))
+/*
 	http.HandleFunc("/tell", func(resp http.ResponseWriter, req *http.Request) {
 		io.WriteString(resp, "I am telling you.")
 	})
+ */
 	log.Fatal(http.ListenAndServe(":8080", nil))
 }
 
