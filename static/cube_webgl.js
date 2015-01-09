@@ -22,6 +22,7 @@ gl_FragColor = vec4(vColor, 1.);\n\
     var gl = null;
     var matrix_proj, matrix_move, matrix_view;
     var vertexId, colorId, facesId;
+    var shader_program;
     var _Pmatrix, _Vmatrix, _Mmatrix, _color, _position;
     var dirtyId = cube.getDirtyBit();
 
@@ -40,7 +41,7 @@ gl_FragColor = vec4(vColor, 1.);\n\
         // Cube shaders
         var shader_vertex = webgl.getShader(shader_vertex_source, gl.VERTEX_SHADER);
         var shader_fragment = webgl.getShader(shader_fragment_source, gl.FRAGMENT_SHADER);
-        var shader_program = gl.createProgram();
+        shader_program = gl.createProgram();
         gl.attachShader(shader_program, shader_vertex);
         gl.attachShader(shader_program, shader_fragment);
         gl.linkProgram(shader_program);
@@ -51,7 +52,6 @@ gl_FragColor = vec4(vColor, 1.);\n\
         _position = gl.getAttribLocation(shader_program, "position");
         gl.enableVertexAttribArray(_color);
         gl.enableVertexAttribArray(_position);
-        gl.useProgram(shader_program);
         // Cube array buffers
         vertexId = gl.createBuffer();
         colorId = gl.createBuffer();
@@ -77,6 +77,9 @@ gl_FragColor = vec4(vColor, 1.);\n\
     this.draw_prepare_camera = function() {
         gl.viewport(0.0, 0.0, canvas.width, canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+        // NOTE: useProgram() must go before setting up the camera.
+        // Camera management must cooperate with the shader
+        gl.useProgram(shader_program);
         gl.uniformMatrix4fv(_Pmatrix, false, matrix_proj);
         gl.uniformMatrix4fv(_Vmatrix, false, matrix_view);
         gl.uniformMatrix4fv(_Mmatrix, false, matrix_move);
@@ -100,7 +103,7 @@ gl_FragColor = vec4(vColor, 1.);\n\
         gl.bindBuffer(gl.ARRAY_BUFFER, colorId);
         gl.vertexAttribPointer(_color, 3, gl.FLOAT, false,4*(3),0);
         gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, facesId);
-        gl.drawElements(gl.TRIANGLES, cube.model.faces.length, gl.UNSIGNED_SHORT, 0);
+        gl.drawElements(gl.TRIANGLES, cube.model.faces.length, gl.UNSIGNED_SHORT, 0)
         gl.flush();
     }
     
