@@ -4,7 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-//	"io"
+	"os"
+	"os/exec"
 )
 
 type Color int
@@ -37,14 +38,22 @@ func (cube *Cube3x3) Init() {
 	cube.R.SetFace(Orange)
 }
 
+func (cube Cube3x3) Faces() map[string]Face {
+	return map[string]Face { "U": cube.U, "D": cube.D, "F": cube.F, "B": cube.B,  "R": cube.R, "L": cube.L }
+}
+
 func (cube Cube3x3) String() string {
-	return fmt.Sprintf("U:%v", cube.B)
+	var s = ""
+	for name, face := range cube.Faces() {
+		face = face
+		s = fmt.Sprintf("%v %v:%v", s, name, face)
+	}
+	return s
 }
 
 func (face *Face) SetFace(c Color) {
 	for x := 0; x < 3; x++ {
 		for y := 0; y < 3; y++ {
-			fmt.Println("Setting: %v,%v to %v", x, y, c);
 			face[x][y] = c
 		}
 	}
@@ -54,24 +63,77 @@ func (face Face) String() string {
 	var s = ""
 	for x := 0; x < 3; x++ {
 		for y := 0; y < 3; y++ {
-			fmt.Println("Reading: %v,%v to %v", x, y, face[x][y]);
-			s = s + string(face[x][y]) + " "  
+			s = fmt.Sprintf("%v %v", s, face[x][y])
 		}
 	}
 	return s
 }
 
+type Config struct {
+	addr string
+	ui string
+	browser string
+}
+
+func Args(args []string) Config {
+	var ret = Config { addr: "localhost:8080", ui: "static" }
+	var opt string
+	var arg string
+	var l = len(args)
+	for i := 1; i < l; i++ {
+		opt = os.Args[i]
+		if i < l-1 {
+			arg = os.Args[i+1]
+			if opt == "-b" {
+				ret.browser = arg
+				i++
+			} else if opt == "-a" {
+				ret.addr = arg
+				i++
+			} else if opt == "-ui" {
+				ret.ui = arg
+				i++;
+			}
+		}
+	}
+	return ret
+}
+
+func Serve(addr string, ui string, srv chan(error)) {
+	// http.HandleFunc("/tell", func(resp http.ResponseWriter, req *http.Request) {
+	// 	io.WriteString(resp, "I am telling you.")
+	// })
+	http.Handle("/", http.FileServer(http.Dir(ui)))
+	err := http.ListenAndServe(addr, nil)
+	if err != nil {
+		srv <- err
+	}
+	close(srv)
+}
+
+func RunUI(browser string, addr string) {
+	fmt.Println("Running browser: ", browser, addr)
+	err := exec.Command(browser, addr).Start()
+	log.Fatal(err)
+}
+
 func main() {
+	var conf = Args(os.Args)
 	var cube = new(Cube3x3)
 	cube.Init()
-	fmt.Println("Cube: ", cube)
-	fmt.Println("Here we go.. starting server");
-	http.Handle("/", http.FileServer(http.Dir("static")))
-/*
-	http.HandleFunc("/tell", func(resp http.ResponseWriter, req *http.Request) {
-		io.WriteString(resp, "I am telling you.")
-	})
- */
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	log.Println("Cube: ", cube)
+
+	var srv chan(error)
+	log.Println("Starting server...");
+	go Serve(conf.addr, conf.ui, srv)
+
+	if conf.browser != "" {
+		log.Println("Running browser...");
+		go RunUI(conf.browser, conf.addr)
+	}
+	select {
+	case err := <-srv:
+		log.Fatal("Server terminated: ", err)
+	}
 }
 
