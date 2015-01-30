@@ -1,15 +1,23 @@
-var Voronoi = function(n, iterate, w, h) {
-  w = w * 1.0;
-  h = h * 1.0;
+var Voronoi = function(n, iterate, w, h, scr_w, scr_h) { 
+  var scr_h2 = scr_h/2, scr_w2 = scr_w/2;
+  this.w = w;
+  this.h = h;
+  this.scr_w = scr_w;
+  this.scr_h = scr_h;
   this.points = [];
   this.dirty = [];
  
   this.init = function() {
-    var h2 = h/2, w2 = w/2;
     this.points = [];
     for (var i = 0; i < n; i++) {
-      this.points.push(iterate(i, w, h))
+      var p = iterate(i);
+      p[0] = (p[0]-.5) * w;
+      p[1] = (p[1]-.5) * h;
+      this.points.push(p)
     }
+  }
+  
+  this.initModel = function() {
     var v = new Array();
     var c = new Array();
     var v_count;
@@ -22,10 +30,10 @@ var Voronoi = function(n, iterate, w, h) {
       var b = (i*17+9)%11*.09;
       c.push(r); c.push(g); c.push(b);
     }
-    for (var y = 0; y < h; y++) {
-      for (var x = 0; x < w; x++) {
+    for (var y = -scr_h2; y < scr_h2; y++) {
+      for (var x = -scr_w2; x < scr_w2; x++) {
         var p = this.nearest(x, y);
-        add_vertex(2*x/w-1, 2*y/h-1);
+        add_vertex(x, y);
         add_color(p[0]);
       }
     }
@@ -33,14 +41,13 @@ var Voronoi = function(n, iterate, w, h) {
     this.markDirty(); 
   }
 
-  this.morph = function() {
+  this.morph = function(delta) {
     var len = this.points.length;
     var i = Math.floor(Math.random() * len);
-    var dx = Math.random() * 10 - 5;
-    var dy = Math.random() * 10 - 5;
+    var dx = (Math.random() - .5) * delta;
+    var dy = (Math.random() - .5) * delta;
     this.points[i][0] += dx;
     this.points[i][1] += dy;
-
     this.markDirty();
   }
   
@@ -78,7 +85,7 @@ var Voronoi = function(n, iterate, w, h) {
   }
 }
 
-Voronoi.random2D = function(i, w, h) {
-  return [Math.random()*w, Math.random()*h];
+Voronoi.random2D = function(i) {
+  return [Math.random(), Math.random()];
 }
 

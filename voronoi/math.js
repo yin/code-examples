@@ -16,6 +16,19 @@ var math = {
     ];
   },
 
+  get_ortho: function(l, r, b, t, n, f) {
+    var w = r - l, h = t - b, d = f - n;
+    var sx = (r + l) / w;
+    var sy = (t + b) / h;
+    var sz = (f + n) / d;
+    return [
+      2./w,    0,     0, 0,
+      0,    2./h,     0, 0,
+      0,       0, -2./d, 0,
+      -sx,   -sy,   -sz, 1
+    ];
+  },
+
   get_I4: function() {
     return [1,0,0,0,
             0,1,0,0,

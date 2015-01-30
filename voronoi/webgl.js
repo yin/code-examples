@@ -23,8 +23,6 @@ var WebGL = function(canvas) {
         } catch (e) {
             throw "You are not webgl compatible :(\n" + e;
         }
-        canvas.width = window.innerWidth - 25;
-        canvas.height = window.innerHeight - 25;
         return gl;
     }
     

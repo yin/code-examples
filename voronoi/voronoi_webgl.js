@@ -9,7 +9,7 @@ attribute vec3 color; //the color of the point\n\
 varying vec3 vColor;\n\
 void main(void) { //pre-built function\n\
 gl_Position = Pmatrix*Vmatrix*Mmatrix*vec4(position, 1.);\n\
-gl_PointSize = 1.5;\n\
+gl_PointSize = 1.0;\n\
 vColor=color;\n\
 }";
   var shader_fragment_source="\n\
@@ -28,12 +28,18 @@ gl_FragColor = vec4(vColor, 1.);\n\
   var dirtyId = voronoi.getDirtyBit();
 
   this.init = function() {
+    var cw = canvas.width = voronoi.scr_w;
+    var ch = canvas.height = voronoi.scr_h;
+    canvas.style['position'] = 'absolute';
+    canvas.style.left = (window.innerWidth - cw - 25) / 2 + 'px';
+    canvas.style.top = (window.innerHeight - ch - 25) / 2 + 'px';
+    
     gl = webgl.initGL();
-    // Camera
-    matrix_proj = math.get_projection(40, canvas.width/canvas.height, 1, 100);
+    // Orthogonal camera projection
+    matrix_proj = math.get_ortho(-cw/2, cw/2, ch/2, -ch/2, .5, 10.0);
     matrix_move = math.get_I4();
     matrix_view = math.get_I4();
-    math.translateZ(matrix_view, -5);
+    math.translateZ(matrix_view, -1.0);
     // Render config
     gl.enable(gl.DEPTH_TEST);
     gl.depthFunc(gl.LEQUAL);
@@ -58,13 +64,11 @@ gl_FragColor = vec4(vColor, 1.);\n\
     colorId = gl.createBuffer();
   }
 
-  var time_old = 0;
   var self = this;
-  this.animate = function() {
-    voronoi.morph();
-    console.log('a');
+  this.animate = function(speed) {
+    voronoi.morph(speed);
     this.draw();
-    setTimeout(this.animate.bind(self), 100);
+    setTimeout(this.animate.bind(self), 10);
   }
   
   this.drag = function(dx, dy) {
@@ -72,7 +76,6 @@ gl_FragColor = vec4(vColor, 1.);\n\
   }
 
   this.draw_prepare_camera = function() {
-    console.log("I see you");
     gl.viewport(0.0, 0.0, canvas.width, canvas.height);
     gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
     // NOTE: useProgram() must go before setting up the camera.
@@ -84,7 +87,6 @@ gl_FragColor = vec4(vColor, 1.);\n\
   }
   
   this.draw_prepare_voronoi = function() {
-    voronoi.init();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexId);
     gl.bufferData(gl.ARRAY_BUFFER,
                   new Float32Array(voronoi.model.vertex), gl.DYNAMIC_DRAW);
@@ -94,8 +96,7 @@ gl_FragColor = vec4(vColor, 1.);\n\
   }
   
   this.draw_voronoi = function(gl) {
-    console.log("Drawn");
-
+    voronoi.initModel();
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexId);
     gl.vertexAttribPointer(_position, 3, gl.FLOAT, false,4*(3),0);
     gl.enableVertexAttribArray(_position);
