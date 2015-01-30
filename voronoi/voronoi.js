@@ -85,7 +85,7 @@ var Voronoi = function(n, iterate, w, h, scr_w, scr_h) {
   }
 }
 
-Voronoi.random2D = function(i) {
+Voronoi.Random2DGenerator = function(i) {
   return [Math.random(), Math.random()];
 }
 

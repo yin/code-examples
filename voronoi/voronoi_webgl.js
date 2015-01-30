@@ -113,7 +113,8 @@ gl_FragColor = vec4(vColor, 1.);\n\
   this.draw = function() {
     this.draw_prepare_camera();
     if (voronoi.dirty[dirtyId]) {
-          voronoi.dirty[dirtyId] = false;
+      voronoi.dirty[dirtyId] = false;
+      voronoi.initModel();
       this.draw_prepare_voronoi();
     }
     this.draw_voronoi(gl);
