@@ -1,9 +1,9 @@
 var main = function($) {
   var canvas = document.getElementById('canvas');
-  const N = 35;
+  const N = 25;
   var generator = Voronoi.Random2DGenerator;
-  const scr_scale = 2.5;
-  var w = 100, h = 100;
+  const scr_scale = 1.5;
+  var w = 150, h = 150;
   var scr_w = w*scr_scale, scr_h = h*scr_scale;
 
   var voronoi = new Voronoi(N, generator, w, h, scr_w, scr_h);
@@ -82,7 +82,7 @@ var main = function($) {
     var updateAndDraw = function() {
       updater(true);
     }
-    if (update.pending > 0) {
+    if (update.pending > 0 && grabbed >= 0) {
       voronoi.points[grabbed][0] += update.x;
       voronoi.points[grabbed][1] += update.y;
       voronoi.markDirty();

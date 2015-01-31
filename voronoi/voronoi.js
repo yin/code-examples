@@ -6,6 +6,7 @@ var Voronoi = function(n, iterate, w, h, scr_w, scr_h) {
   this.scr_h = scr_h;
   this.points = [];
   this.dirty = [];
+  this.cost = Voronoi.FastApproximateDistance || Voronoi.FastEuclidDistance;
  
   this.init = function() {
     this.points = [];
@@ -32,23 +33,18 @@ var Voronoi = function(n, iterate, w, h, scr_w, scr_h) {
     }
     for (var y = -scr_h2; y < scr_h2; y++) {
       for (var x = -scr_w2; x < scr_w2; x++) {
-        var p = this.nearest(x, y);
+        var p = this.nearest(x, y, this.cost);
         add_vertex(x, y);
         add_color(p[0]);
       }
     }
+    console.log(this.__r);
     this.model = { vertex: v, colors: c };
     this.markDirty(); 
   }
 
   this.nearest = function(x, y) {
-    var cost = function(a, b) {
-      var dx = b[0]-a[0];
-      var dy = b[1]-a[1];
-      var d2 = dx*dx + dy*dy;
-      var d = Math.sqrt(d2);
-      return d;
-    }
+    var cost = this.cost;
     var point = [x*1.0, y*1.0];
     var mini = -1, minc = -1;
     //TODO yin: Let a look-up strategy function decide how to iterate the set
@@ -85,3 +81,46 @@ Voronoi.SpiralGenerator = function(i) {
   return [Math.sin(a) * b, Math.cos(a) * b];
 }
 
+Voronoi.FastEuclidDistance = function(a, b) {
+  var dx = b[0]-a[0];
+  var dy = b[1]-a[1];
+  var d2 = dx*dx + dy*dy;
+  return d2;
+}
+Voronoi.EuclidDistance = function(a, b) {
+  var dx = b[0]-a[0];
+  var dy = b[1]-a[1];
+  var d2 = dx*dx + dy*dy;
+  var d = Math.sqrt(d2);
+  return d;
+}
+Voronoi.ManhattanDistance = function(a, b) {
+  var dx = b[0]-a[0];
+  var dy = b[1]-a[1];
+  var d = Math.abs(dx) + Math.abs(dy);
+  return d;
+}
+Voronoi.LargerCartesianDistance = function(a, b) {
+  var dx = b[0]-a[0];
+  var dy = b[1]-a[1];
+  var d = Math.max(Math.abs(dx), Math.abs(dy));
+  return d;
+}
+Voronoi.FastApproximateDistance = function(a, b) {
+  // from http://www.flipcode.com/archives/Fast_Approximate_Distance_Functions.shtml
+  var dx = Math.abs(b[0]-a[0]);
+  var dy = Math.abs(b[1]-a[1]);
+  var min, max;
+
+  if (dx < dy) {
+    min = dx;
+    max = dy;
+  } else {
+    min = dy;
+    max = dx;
+  }
+
+   // coefficients equivalent to ( 123/128 * max ) and ( 51/128 * min )
+   return ((( max << 8 ) + ( max << 3 ) - ( max << 4 ) - ( max << 1 ) +
+            ( min << 7 ) - ( min << 5 ) + ( min << 3 ) - ( min << 1 )) >> 8 );
+}
