@@ -41,16 +41,6 @@ var Voronoi = function(n, iterate, w, h, scr_w, scr_h) {
     this.markDirty(); 
   }
 
-  this.morph = function(delta) {
-    var len = this.points.length;
-    var i = Math.floor(Math.random() * len);
-    var dx = (Math.random() - .5) * delta;
-    var dy = (Math.random() - .5) * delta;
-    this.points[i][0] += dx;
-    this.points[i][1] += dy;
-    this.markDirty();
-  }
-  
   this.nearest = function(x, y) {
     var cost = function(a, b) {
       var dx = b[0]-a[0];
@@ -87,5 +77,11 @@ var Voronoi = function(n, iterate, w, h, scr_w, scr_h) {
 
 Voronoi.Random2DGenerator = function(i) {
   return [Math.random(), Math.random()];
+}
+
+Voronoi.SpiralGenerator = function(i) {
+  var a = i / 1.66;
+  var b = i / 13.0;
+  return [Math.sin(a) * b, Math.cos(a) * b];
 }
 

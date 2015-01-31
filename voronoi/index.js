@@ -1,6 +1,6 @@
 var main = function($) {
   var canvas = document.getElementById('canvas');
-  const N = 15;
+  const N = 35;
   var generator = Voronoi.Random2DGenerator;
   const scr_scale = 2.5;
   var w = 100, h = 100;
@@ -14,7 +14,7 @@ var main = function($) {
   voronoigl.init();
  
   var lx, ly;
-  var grabbed = undefined;
+  var grabbed = -1;
   var update = {x:0, y:0, pending: 0};
   var morphing = false;
   var grab = function(ev) {
@@ -39,15 +39,32 @@ var main = function($) {
   };
   var letgo = function() {
     $(this).unbind('mousemove');
-    delete grabbed;
+    grabbed = -1;
   };
   var morph = function(voronoi, delta) {
     var len = voronoi.points.length;
-    var i = Math.floor(Math.random() * len);
-    var dx = (Math.random() - .5) * delta;
-    var dy = (Math.random() - .5) * delta;
-    voronoi.points[i][0] += dx;
-    voronoi.points[i][1] += dy;
+    var tx = 0, ty = 0, dx = [], dy = [];
+    for (var i = 0; i < voronoi.points.length; i++) {
+      var x = (Math.random() - .5);
+      var y = (Math.random() - .5);
+      dx.push(x);
+      dy.push(y);
+      tx += Math.abs(x);
+      ty += Math.abs(y);
+    }
+    tx = tx / delta;
+    ty = ty / delta;
+    for (var i = 0; i < voronoi.points.length; i++) {
+      voronoi.points[i][0] += (dx[i] * tx);
+      voronoi.points[i][1] += (dy[i] * ty);
+      if (voronoi.points[i][0] < -w
+          || voronoi.points[i][0] > w
+          || voronoi.points[i][1] < -h
+          || voronoi.points[i][1] > h) {
+        voronoi.points[i][0] /= 2;
+        voronoi.points[i][1] /= 2;
+      }
+    }
     voronoi.markDirty();
   }
   
@@ -56,7 +73,6 @@ var main = function($) {
   jcanvas.mouseup(letgo);
   $('#morph').click(function() {
     morphing = !morphing;
-    console.log(morphing);
     if (morphing) {
       updater(false);
     }
@@ -79,8 +95,8 @@ var main = function($) {
     if (grabbed >= 0) {
       updater.timeout = setTimeout(updateAndDraw, 15);
     } else if (morphing) {
-      morph(voronoi, 6);
-      updater.timeout = setTimeout(updateAndDraw, 6);
+      morph(voronoi, 2);
+      updater.timeout = setTimeout(updateAndDraw, 10);
     }
     return updater.timeout;
   }
