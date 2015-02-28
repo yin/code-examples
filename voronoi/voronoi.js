@@ -6,7 +6,7 @@ var Voronoi = function(n, iterate, w, h, scr_w, scr_h) {
   this.scr_h = scr_h;
   this.points = [];
   this.dirty = [];
-  this.cost = Voronoi.FastApproximateDistance || Voronoi.FastEuclidDistance;
+  this.cost = Voronoi.FastApproximateDistance && false || Voronoi.FastEuclidDistance;
  
   this.init = function() {
     this.points = [];
@@ -38,7 +38,6 @@ var Voronoi = function(n, iterate, w, h, scr_w, scr_h) {
         add_color(p[0]);
       }
     }
-    console.log(this.__r);
     this.model = { vertex: v, colors: c };
     this.markDirty(); 
   }
