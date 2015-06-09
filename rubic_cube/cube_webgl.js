@@ -78,7 +78,7 @@ gl_FragColor = vec4(vColor, 1.);\n\
         gl.viewport(0.0, 0.0, canvas.width, canvas.height);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
         // NOTE: useProgram() must go before setting up the camera.
-        // Camera management must cooperate with the shader
+        // Camera matrices are parameters of the vertex shader program.
         gl.useProgram(shader_program);
         gl.uniformMatrix4fv(_Pmatrix, false, matrix_proj);
         gl.uniformMatrix4fv(_Vmatrix, false, matrix_view);
