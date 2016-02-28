@@ -35,3 +35,4 @@ target/
 out/
 tomcat.8080/
 .idea/
+bower_components/
