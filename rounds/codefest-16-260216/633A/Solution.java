@@ -38,7 +38,7 @@ class BruteSolver {
             a ^= b;
         }
         int am = c / a;
-        for (int an = am; an > 0; an--) {
+        for (int an = am; an >= 0; an--) {
             if ((c-(an * a)) % b == 0) {
                 return true;
             }
