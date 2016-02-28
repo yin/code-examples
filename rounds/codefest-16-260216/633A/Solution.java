@@ -5,7 +5,7 @@ public class Solution {
         // TODO yin: Scanner is too slow
         Scanner r = new Scanner(System.in);
         int a = r.nextInt(), b = r.nextInt(), c = r.nextInt();
-        System.out.println(new Solver().solve(a, b, c) ? "Yes" : "No");
+        //System.out.println(new Solver().solve(a, b, c) ? "Yes" : "No");
         System.out.println(new BruteSolver().solve(a, b, c) ? "Yes" : "No");
     }
 }
@@ -39,7 +39,7 @@ class BruteSolver {
         }
         int am = c / a;
         for (int an = am; an > 0; an--) {
-            if ((an * a) % b == 0) {
+            if ((c-(an * a)) % b == 0) {
                 return true;
             }
         }
