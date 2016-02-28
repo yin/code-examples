@@ -5,3 +5,6 @@ a.out
 .venv/
 solutions
 problems
+*.class
+*.iml
+out/
