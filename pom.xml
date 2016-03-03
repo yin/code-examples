@@ -33,7 +33,7 @@
                     <assembleDirectory>target</assembleDirectory>
                     <programs>
                         <program>
-                            <mainClass>com.github.yin.angular.prototype.Main</mainClass>
+                            <mainClass>com.github.yin.angular.prototype.MinimalTomcatMain</mainClass>
                             <name>webapp</name>
                         </program>
                     </programs>
