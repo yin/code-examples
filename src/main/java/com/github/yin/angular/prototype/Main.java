@@ -17,7 +17,8 @@ public class Main {
         Tomcat tomcat = new Tomcat();
         tomcat.setPort(PORT);
 
-        StandardContext ctx = (StandardContext) tomcat.addWebapp("/", new File(SRC_WEBAPP).getAbsolutePath());
+        StandardContext ctx =
+            (StandardContext) tomcat.addContext("/", new File(SRC_WEBAPP).getAbsolutePath());
         System.out.println("Serving files from path: " + new File("./" + SRC_WEBAPP).getAbsolutePath());
 
         // Declare an alternative location for your "WEB-INF/classes" dir
