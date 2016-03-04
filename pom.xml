@@ -8,6 +8,7 @@
     <name>AngularJS + Java prototype</name>
     <url>http://maven.apache.org</url>
     <properties>
+        <jaxws.version>2.2.8</jaxws.version>
         <jersey.version>1.19</jersey.version>
         <junit.version>4.12</junit.version>
         <tomcat.version>8.0.28</tomcat.version>
@@ -32,6 +33,11 @@
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-json</artifactId>
             <version>${jersey.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>com.sun.xml.ws</groupId>
+            <artifactId>jaxws-rt</artifactId>
+            <version>${jaxws.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
@@ -63,6 +69,14 @@
                         </goals>
                     </execution>
                 </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <configuration>
+                    <source>1.6</source>
+                    <target>1.6</target>
+                </configuration>
             </plugin>
         </plugins>
     </build>

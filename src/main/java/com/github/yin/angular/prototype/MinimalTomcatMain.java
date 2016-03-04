@@ -52,6 +52,14 @@ public class MinimalTomcatMain {
             ctx.addChild(restServlet);
             ctx.addServletMapping("/rest/*", "rest");
         }
+        if (ENABLE_SOAP_API) {
+            Wrapper soapServlet = ctx.createWrapper();
+            soapServlet.setName("soap");
+            soapServlet.setServletClass(com.sun.xml.ws.transport.http.servlet.WSServlet.class.getCanonicalName());
+            soapServlet.setLoadOnStartup(3);
+            ctx.addChild(soapServlet);
+            ctx.addServletMapping("/soap", "soap");
+        }
     }
 
     private static void setupWebapp(Tomcat tomcat, StandardContext ctx) {
