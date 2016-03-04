@@ -19,10 +19,13 @@ public class MinimalTomcatMain {
     private static final boolean SERVE_JSPS = false;
     private static final boolean USE_INDEX_JSP = false;
     private static final boolean USE_DEFAULT_MIMETYPES = true;
+    private static final boolean ENABLE_JSON_REST = true;
 
     public static final int PORT = 8080;
     public static final String SRC_WEBAPP = "src/main/webapp/";
     public static final int SESSION_TIMEOUT = 30;
+    private static final boolean ENABLE_REST_API = true;
+    private static final boolean ENABLE_SOAP_API = true;
 
     public static void main(String[] args) throws Exception {
         Tomcat tomcat = new Tomcat();
@@ -39,11 +42,16 @@ public class MinimalTomcatMain {
     }
 
     private static void setupCustom(StandardContext ctx) {
-        Wrapper servlet = ctx.createWrapper();
-        servlet.setName("hello2");
-        servlet.setServletClass(Servlet.class.getCanonicalName());
-        ctx.addChild(servlet);
-        ctx.addServletMapping("/hello2", "hello2");
+        if (ENABLE_REST_API) {
+            Wrapper restServlet = ctx.createWrapper();
+            restServlet.setName("rest");
+            restServlet.setServletClass(com.sun.jersey.spi.container.servlet.ServletContainer.class.getCanonicalName());
+            restServlet.addInitParameter("com.sun.jersey.config.property.packages", "com.github.yin.angular.prototype");
+            if (ENABLE_JSON_REST) restServlet.addInitParameter("com.sun.jersey.api.json.POJOMappingFeature", "true");
+            restServlet.setLoadOnStartup(2);
+            ctx.addChild(restServlet);
+            ctx.addServletMapping("/rest/*", "rest");
+        }
     }
 
     private static void setupWebapp(Tomcat tomcat, StandardContext ctx) {
@@ -72,7 +80,7 @@ public class MinimalTomcatMain {
             if (SERVE_JSPS) {
                 Wrapper jspServlet = ctx.createWrapper();
                 jspServlet.addInitParameter("fork", "false");
-                jspServlet.setLoadOnStartup(3);
+                jspServlet.setLoadOnStartup(4);
                 jspServlet.setOverridable(true);
                 ctx.addServletMapping("*.jsp", "jsp");
                 ctx.addServletMapping("*.jspx", "jsp");
@@ -88,7 +96,7 @@ public class MinimalTomcatMain {
 
     private static void setupResources(StandardContext ctx) {
         // Declare an alternative location for your "WEB-INF/classes" dir
-        // Servlet 3.0 annotation will work
+        // HelloServlet 3.0 annotation will work
         File additionWebInfClasses = new File("target/classes");
         WebResourceRoot resources = new StandardRoot(ctx);
         resources.addPreResources(new DirResourceSet(resources, "/WEB-INF/classes",

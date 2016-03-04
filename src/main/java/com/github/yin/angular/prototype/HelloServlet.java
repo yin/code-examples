@@ -14,7 +14,7 @@ import javax.servlet.http.HttpServletResponse;
         name = "MyServlet",
         urlPatterns = {"/hello"}
 )
-public class Servlet extends HttpServlet {
+public class HelloServlet extends HttpServlet {
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse resp)
