@@ -36,7 +36,7 @@ for prob in $@; do
     ret=$?
     if [ $ret -eq 0 ] && [ -e $index ] && [ ! -e $pdf ]; then
         echo "$" wkhtmltopdf --allow $dir $index $pdf
-        wkhtmltopdf --allow $dir $index $pdf -q 
+        wkhtmltopdf -q --allow $dir $index $pdf 
         if [ $? -eq 0 ]; then
             echo
             echo "  file://$curd/$pdf"
