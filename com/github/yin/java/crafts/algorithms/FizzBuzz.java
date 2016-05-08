@@ -1,4 +1,4 @@
-package com.github.yin.java.crafts;
+package com.github.yin.java.crafts.algorithms;
 
 import java.lang.NumberFormatException;
 import java.io.PrintStream;

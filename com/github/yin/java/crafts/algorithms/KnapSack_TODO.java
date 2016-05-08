@@ -1,4 +1,4 @@
-package com.github.yin.java.crafts;
+package com.github.yin.java.crafts.algorithms;
 
 import static java.lang.Math.max;
 
@@ -22,7 +22,7 @@ import static java.lang.Math.max;
  * 1. Find the maximum possible benefit given M and array of items I.
  * 2. Find the combination of items giving the above result. 
  */
-public class KnapSack {
+public class KnapSack_TODO {
     // Lets pack all test data into this particular file for now
     private static final Item[][] testData = {
         { new Item(5, 3), new Item(3, 2), new Item(4, 1) },
@@ -35,13 +35,14 @@ public class KnapSack {
     public static void main(String args[]) {
     }
 
-    public KnapSack(int M, Item[] items) {
+    public KnapSack_TODO(int M, Item[] items) {
         this.M = M;
         this.items = items;
     }
 
     public int solveBruteForce() {
         // TODO yin: write the straight-forward O(2^n) solution here latter
+        return -1;
     }
 
     /** In dynamic programming, we want to do 3 things:
@@ -73,11 +74,13 @@ public class KnapSack {
             for (int x = 0; x < M + 1; x++) {
                 // While doing the first item, we can compare only with no items
                 // in the knapsack and we know the answer here, it's 0
-                int left = i > 0 ? left = A[i-1][x] : 0;
-                int leftUnder i > 0 ? (x >= b ? A[i-1][x-b]) : 0
-                A[i][x] = max(left, b + A[]);
+                int left = i > 0 ? left = A[i - 1][x] : 0;
+// TODO yin: Continue with solution HERE
+//                int leftUnder i > 0 ? (x >= b ? A[i-1][x-b]) : 0
+//                A[i][x] = max(left, b + A[]);
             }
         }
+return -1;
     }
 
     public static class Item {
