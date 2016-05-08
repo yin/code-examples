@@ -1,5 +1,6 @@
 package com.github.yin.lado;
 
+@Deprecated
 public class BitOperations {
 
     public static void main(String[] args) {
