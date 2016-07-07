@@ -1,27 +1,32 @@
-type NodeId = number;
+import {GraphAdjacencyListImpl} from 'graph-adjacency.ts';
+import {GraphAdjacencyList} from "./graph-adjacency";
+import {GraphAdjacencyEdit} from "./graph-adjacency";
 
-enum GraphOrientation {
-    Undirected = 1,
-    Directed
+export type NodeId = number;
+export type EdgeId = number;
+
+export enum GraphOrientation {
+  Undirected = 1,
+  Directed
 }
 
-interface BasicGraph {
+export interface BasicGraph {
   orientation:GraphOrientation;
   nodes:GraphNode[];
-  hasNode(node : NodeId) : boolean;
-  getNode(node : NodeId) : GraphNode;
-  forNodes(callback : (NodeId) => any);
-  hasEdge(start : NodeId, end : NodeId) : boolean;
-  getEdgeProperties(start : NodeId, end : NodeId) : Object;
-  forAllEdges(callback : (NodeId) => any);
-  forNodeEdges(start : NodeId, callback : (NodeId) => any);
+  adjacencyList:GraphAdjacencyList;
+  adjacencyEdit:GraphAdjacencyEdit;
+  hasNode(node:NodeId):boolean;
+  getNode(node:NodeId):GraphNode;
+  forNodes(callback:(NodeId) => any);
+  isUndirected:boolean;
+  isDirected:boolean;
 }
 
-interface EditableGraph {
-  createNode(properties : Object) : GraphNode;
-  removeNode(node : NodeId) : boolean;
-  createEdge(start : NodeId, end : NodeId) : boolean;
-  removeEdge(start : NodeId, end : NodeId) : boolean;
+export interface GraphEdit {
+  createNode(properties:Object):GraphNode;
+  removeNode(node:NodeId):boolean;
+  createEdge(start:NodeId, end:NodeId, properties:Object):boolean;
+  removeEdge(start:NodeId, end:NodeId):boolean;
 }
 
 /**
@@ -29,39 +34,63 @@ interface EditableGraph {
  * list - most algorithm are fastest on this repesentation, but substractive
  * modifications are much slower.
  */
-class GraphModel implements BasicGraph, EditableGraph{
-  nodes : GraphNode[] = [];
+export class GraphModel implements BasicGraph, GraphEdit {
+  nodes:GraphNode[] = [];
   // TODO yin: Separate edges into a GraphRepresentation (adjacency list,
   // matrix, and edge list maybe) and provide interfaces to efficiently
   // work with them
-  /** adjacency list of edges, i.e.: adjacency[startNode][edgeIndex] */
-  adjacency : NodeId[][] = [];
-  /**
-   * Edge properties - sparse matrix representation, i.e.:
-   * edgeProps[startNode][endNode] */
-  edgeProps : Object[][] = [];
-  _lastNodeId : number = 0;
+  private adjacency:GraphAdjacencyListImpl = new GraphAdjacencyListImpl(this);
+  private _lastNodeId:NodeId = 0;
+  private _lastEdgeId:EdgeId = 0;
+  private _nodeCount = 0;
+  private _edgeCount = 0;
 
-  constructor(public orientation : GraphOrientation) {}
+  constructor(public orientation:GraphOrientation) {
+  }
 
-  get nodes() { return this.nodes; }
+  get nodes() {
+    return this.nodes;
+  }
+
+  /** Returns adjacency list representation of Graph edges. There might be others implemented
+   * in the future based as views, or rather synchronized independent data structures, but
+   * having multiple representations caps performance to the worse case everytime.
+   */
+  get adjacencyList() {
+    return this.adjacency
+  }
+
+  get adjacencyEdit() {
+    return this.adjacency
+  }
+
+  get isUndirected() {
+    return this.orientation == GraphOrientation.Undirected
+  }
+
+  get isDirected() {
+    return this.orientation == GraphOrientation.Directed
+  }
 
   /**
    * Creates a graph node and adds it into the graph.
    */
-  createNode(properties : Object) : GraphNode {
+  createNode(properties:Object):GraphNode {
     if (properties['position'] != null) {
       var node = new GraphNode(++this._lastNodeId, properties);
-      if (this.addNode(node))
+      if (this.addNode(node)) {
+        this._nodeCount++;
         return node;
+      }
     }
     return null;
   }
 
   removeNode(node:NodeId):boolean {
     if (this.hasNode(node)) {
-      this._removeEdgesInto(node);
+      this.adjacency.$removeEdgesInto(node);
       this._removeNode(node);
+      this._nodeCount--;
       return true;
     }
     return false;
@@ -72,7 +101,7 @@ class GraphModel implements BasicGraph, EditableGraph{
     delete this.nodes[node];
   }
 
-  private addNode(node : GraphNode) : boolean {
+  private addNode(node:GraphNode):boolean {
     if (node != null && !this.hasNode(node.id)) {
       this.nodes.push(node);
       return true;
@@ -80,22 +109,22 @@ class GraphModel implements BasicGraph, EditableGraph{
     return false;
   }
 
-  hasNode(node : NodeId) : boolean {
+  hasNode(node:NodeId):boolean {
     return true === this.forNodes((n) => {
-      if (n.id == node) {
-        throw true;
-      }
-    });
+          if (n.id == node) {
+            throw true;
+          }
+        });
   }
 
-  getNode(node : NodeId) : GraphNode {
+  getNode(node:NodeId):GraphNode {
     return this.nodes[node];
   }
 
   /** This function applies a lambda to all node in the graph, if the lambda
    * throws an expection, this value will be returned and loop stops.
    */
-  forNodes(callback : (GraphNode) => any) {
+  forNodes(callback:(GraphNode) => any) {
     for (var node of this.nodes) {
       try {
         callback(node);
@@ -105,116 +134,41 @@ class GraphModel implements BasicGraph, EditableGraph{
     }
   }
 
-  createEdge(start : NodeId, end : NodeId,
-                       properties : Object = null) : boolean {
-    if (start != null && end != null
-        && this.hasNode(start) && this.hasNode(end)) {
-      return this.addEdge(start, end, properties);
+  createEdge(start:NodeId, end:NodeId, properties:Object):boolean {
+    var edge = new GraphEdge(this._lastEdgeId++, start, end, properties);
+    if (this.adjacency.createEdge(edge)) {
+      this._edgeCount++;
+      return true;
     }
-    return null;
+    return false;
   }
-
   removeEdge(start:NodeId, end:NodeId):boolean {
-    this._removeEdge(start, end)
-    if (this.orientation == GraphOrientation.Undirected) {
-      this._removeEdge(end, start);
-    }
-    return false;
-  }
-
-  private _removeEdgesInto(node:NodeId):void {
-    this.forAllEdges((start, end) => {
-      if (end == node) {
-        this._removeEdge(start, end);
-      }
-    })
-  }
-
-  private _removeEdge(start:NodeId, end:NodeId):boolean{
-    var startAdj = this.adjacency[start];
-    for (var index in startAdj) {
-      if (startAdj[index] == end) {
-        var adj = this.adjacency[start];
-        delete this.edgeProps[start][index];
-        delete adj[index];
-        // We don't allow duplicate edges, cut it here
-        return true;
-      }
-    }
-    return false;
-  }
-
-  private addEdge(start : NodeId, end : NodeId,
-                  properties : Object = null) : boolean {
-    if (!this.hasEdge(start, end)) {
-      this.adjacency[start].push(end);
-      this.edgeProps[start][end] = properties;
-      // TODO yin: Separate directianality logic into strategies
-      if (this.orientation == GraphOrientation.Undirected) {
-        this.adjacency[end].push(start)
-        this.edgeProps[end][start] = properties;
-      }
-      return true;
-    }
-    return false;
-  }
-
-  hasEdge(start : NodeId, end : NodeId) : boolean {
-    if (this.forNodeEdges(start, (s, e) => {
-          if (start == s && end == e) {
-            throw true;
-          }
-        }))
-      return true;
-    if (this.orientation == GraphOrientation.Undirected
-        && this.forNodeEdges(start, (s, e) => {
-              if (start == s && end == e || (start == e && end == s)) {
-            throw true;
-            }
-        }))
-      return true;
-
-    return false;
-  }
-
-  getEdgeProperties(start, end) : Object {
-    return this.edgeProps[start, end];
-  }
-
-  forAllEdges(callback : (number, number) => any) {
-    for (var node of this.nodes) {
-      var result = this.forNodeEdges(node.id, callback);
-      if (result !== undefined)
-          return result;
-    }
-  }
-
-  forNodeEdges(start : NodeId, callback : (number, number) => any) {
-    var nodeEdges = this.adjacency[start];
-    for (var end of nodeEdges) {
-      try {
-        callback(start, end);
-      } catch (result) {
-        return result;
-      }
-    }
+    return this.adjacency.removeEdge(start, end);
   }
 
   toString() {
-    return this.orientation;
+    return this.type;
   }
 
   get type() {
-    return this.orientation == GraphOrientation.Directed ? +'oriented' : 'unoriented';
+    return this.orientation == GraphOrientation.Directed ? +'directed' : 'undirected';
   }
 }
 
-
-class GraphNode {
+export class GraphNode {
   constructor(public id: number, public properties : Object) {}
 
   toString() {
     var position = this.properties['position'];
     return '${id}|' + JSON.stringify(position);
+  }
+}
+
+export class GraphEdge {
+  constructor(public id: number, public start:NodeId, public end:NodeId, public properties:Object) {}
+
+  toString() {
+    var position = this.properties['position'];
+    return '${this.id}(${this.start}->${this.end}|' + JSON.stringify(position);
   }
 }

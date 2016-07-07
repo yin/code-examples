@@ -1,30 +1,68 @@
-class GraphCanvasControl {
-  debug = false;
-  canvas : HTMLCanvasElement;
+import {BasicGraph, GraphNode} from "graph-model"
+import {GraphEdge} from "./graph-model";
+import {NodeId} from "./graph-model";
+import {Vector2} from "./vector2";
+import {GraphModel} from "./graph-model";
 
-  /*int defaultNodeDisplayRadius = 10;
-  CanvasElement canvas;
-  GraphRenderer renderer;
-  GraphModel _model;
-  GraphNode selected;
+interface Selection {
+  remove():Selection;
+  setProperty(key:string, value:Object);
+}
+class EmptySelection implements Selection {
+  private static singleton:Selection = new EmptySelection();
+  static get singleton() { return this.singleton }
+
+  remove():Selection {
+    return EmptySelection.singleton;
+  }
+  setProperty(key:string, value:Object) {
+  }
+}
+class NodeSelection implements Selection {
+  constructor(public model:BasicGraph, public node:GraphNode) {}
+
+  remove():Selection {
+    return EmptySelection.singleton;
+  }
+  setProperty(key:string, value:Object) {
+    this.node.properties[key] = value;
+  }
+}
+class EdgeSelection implements Selection {
+  constructor(public model:BasicGraph, public edge:GraphEdge) {}
+
+  remove():Selection {
+    if (this.model.adjacencyEdit.removeEdge(this.edge.start, this.edge.end)) {
+      return EmptySelection.singleton;
+    } else {
+      return this;
+    }
+  }
+  setProperty(key:string, value:Object) {
+    this.edge.properties[key] = value;
+  }
+}
+
+export class GraphCanvasControl {
+  debug = false;
+  model:GraphModel;
+  selecton:Selection = EmptySelection.singleton;
+
+  /*
   List<dynamic> path;
   GraphNode lastNode;
   GraphEdge lastEdge;
 */
-  constructor(private canvas:HTMLCanvasElement) {
+  constructor(private canvas:HTMLCanvasElement, private renderer:GraphRenderer) {
   }
 
-  public render(model:BasicGraph) {
-
-  }
-  /*
   get model() { return this._model };
-  set model(GraphModel model) {
-    _model = model;
+  set model(model:GraphModel) {
+    this.model = model;
     selected = null;
     renderer.draw();
   }
-
+/*
   @override
   void attached() {
     super.attached();
@@ -70,44 +108,6 @@ class GraphCanvasControl {
     selected = node;
   }
 
-  Symbol canvasArea(Point position) {
-    int x = position.x;
-    int y = position.y;
-    int minX = defaultNodeDisplayRadius;
-    int minY = defaultNodeDisplayRadius;
-    int maxX = canvas.width - defaultNodeDisplayRadius;
-    int maxY = canvas.height- defaultNodeDisplayRadius;
-    if (x >= minX && x <= maxX && y >= minY && y <= maxY) {
-      return #inside;
-    } else if (x < minX && y >= minY && y <= maxY) {
-      return #left;
-    } else if (x > maxX && y >= minY && y <= maxY) {
-      return #right;
-    } else if (y < minX && x >= minX && x <= maxX) {
-      return #top;
-    } else if (y > maxY && x >= minX && x <= maxX) {
-      return #bottom;
-    } else {
-      return #corner;
-    }
-  }
-
-  GraphNode getNodeAt(Point position) {
-    return model.forNodes((node) {
-      Point delta = node.properties['position'] - position;
-      num distSquare = delta.x*delta.x + delta.y*delta.y;
-      num distance = sqrt(distSquare);
-      if (debug) {
-        var id = node.id;
-        print('getNodeAt($position) node:$id delta:$delta dist^2:$distSquare '
-            + 'dist:$distance');
-      }
-      if (distance <= 2 * defaultNodeDisplayRadius) {
-        throw node;
-      }
-    });
-  }
-
   bool parseString(String string) {
     GraphModel model = new GraphModel.parse(string);
     if (model != null) {
@@ -120,132 +120,102 @@ class GraphCanvasControl {
   */
 }
 
+const TWO_PI = 2*Math.PI;
+
 class GraphRenderer {
   debug = false;
   private model:BasicGraph;
   private ctx:CanvasRenderingContext2D;
-  private width:number;
-  private height:number;
-  /*
-  GraphCanvasTag tag;
-  GraphRenderer(GraphCanvasTag tag) : tag = tag;
-  String backgroundFill = '#ffffff';
-  String edgeStroke_none = '#000000';
-  String edgeStroke_selected = '#606060';
-  String edgeStroke_path = '#000000';
-  num edgeWidth_none = 1;
-  num edgeWidth_selected = 2;
-  num edgeWidth_path = 2;
-  String arrowStroke_none = '#000000';
-  String arrowStroke_selected = '#000000';
-  String arrowStroke_path = '#000000';
-  num arrowSize_none = 16;
-  num arrowSize_selected = 16;
-  num arrowSize_path = 16;
-  num arrowWidthIncrement_none = 0;
-  num arrowWidthIncrement_selected = 1;
-  num arrowWidthIncrement_path = 1;
-  String nodeStroke_none = '#303030';
-  String nodeStroke_selected = '#303030';
-  String nodeStroke_path = '#303030';
-  String nodeFill_none = '#d94040';
-  String nodeFill_selected = '#80d080';
-  String nodeFill_path = '#d94040';
-  num nodeWidth_none = 1;
-  num nodeWidth_selected = 2;
-  num nodeWidth_path = 3;
-*/
 
-  draw(model:BasicGraph, ctx:CanvasRenderingContext2D,
-       width:number, height:number) {
+  constructor(private settings:GraphCanvasSettings) {}
+
+  draw(model:BasicGraph, ctx:CanvasRenderingContext2D) {
     if (this.debug) {
       var a = model.nodes.length;
       console.log("draw() nodes:${a}");
     }
     // Misusing instance fields here
     this.model = model;
-    this.ctx = ctx;
-    this.width = width;
-    this.height = height;
     ctx['imageSmoothingEnabled'] = true;
     this.clear();
 
     model.forNodes((node) => {
       this.drawNode(ctx, node);
     });
-    model.forAllEdges((edge) => {
+    model.adjacencyList.forAllEdges((edge) => {
       this.drawEdge(ctx, edge);
     });
   }
-  drawNode(ctx:CanvasRenderingContext2D, node:GraphNode) {
-   Point pos = node.properties['position'];
-   ctx.beginPath();
-   ctx.arc(pos.x, pos.y, tag.defaultNodeDisplayRadius, 0, 2*PI);
-   ctx.closePath();
-   applyStyle(ctx, node);
-   ctx.fill();
-   ctx.stroke();
-   }
-/*
 
-  void drawEdge(CanvasRenderingContext2D ctx, GraphEdge edge) {
-    Point start = edge.start.properties['position'];
-    Point end = edge.end.properties['position'];
-    Point delta = end - start;
-    //TODO yin: Test sqrt(Pitagoras) vs. Point.distanceTo() approach fo speed
-    num distance = sqrt(delta.x*delta.x + delta.y*delta.y);
-    Point tangent = new Point(delta.x / distance, delta.y / distance);
-    Point nodeSizedDelta = tangent * tag.defaultNodeDisplayRadius;
-    Point edgeStart = start + nodeSizedDelta;
-    Point edgeEnd = end - nodeSizedDelta;
+  drawNode(ctx:CanvasRenderingContext2D, node:GraphNode) {
+    var pos = node.properties['position'];
     ctx.beginPath();
-    ctx.moveTo(edgeStart.x, edgeStart.y);
-    ctx.lineTo(edgeEnd.x, edgeEnd.y);
-    applyStyle(ctx, edge);
+    ctx.arc(pos.x, pos.y, this.settings.nodeRadius_none, 0, TWO_PI);
+    ctx.closePath();
+    this.applyStyle(ctx, node);
+    ctx.fill();
     ctx.stroke();
-    drawArrow(ctx, edge, tangent, edgeStart, edgeEnd);
-    if (debug) {
-      print("draw.edge($edge) delta:$delta distance:$distance norm:$tangent");
-      print("         S:$start E:$end");
-      print("         s:$edgeStart e:$edgeEnd");
+  }
+
+  drawEdge(ctx:CanvasRenderingContext2D, edge:GraphEdge):void {
+    var start:Vector2 = this.getNode(edge.start).properties['position'];
+    var end:Vector2 = this.getNode(edge.end).properties['position'];
+    var delta = end.sub(start);
+    //TODO yin: Test sqrt(Pitagoras) vs. Point.distanceTo() approach fo speed
+    var distance = delta.length;
+    var tangent = delta.div(distance);
+    var scaledTangent = tangent.mult(this.settings.nodeRadius_none);
+    var lineStart:Vector2 = start.add(scaledTangent);
+    var lineEnd:Vector2 = end.sub(scaledTangent);
+    ctx.beginPath();
+    ctx.moveTo(lineStart.x, lineStart.y);
+    ctx.lineTo(lineEnd.x, lineEnd.y);
+    this.applyStyle(ctx, edge);
+    ctx.stroke();
+    this.drawArrow(ctx, edge, tangent, lineStart, lineEnd);
+    if (this.debug) {
+      console.log("draw.edge($edge) delta:${delta} dist:${distance} norm:${tangent}");
+      console.log("         S:${start} E:${end}");
+      console.log("         s:${lineStart} e:${lineEnd}");
     }
   }
 
-  void drawArrow(CanvasRenderingContext2D ctx, GraphEdge edge, Point tangent,
-                 Point edgeStart, Point edgeEnd) {
-    if (arrowSize_none > 0 || arrowSize_selected > 0|| arrowSize_path > 0) {
+  drawArrow(ctx:CanvasRenderingContext2D, edge:GraphEdge, tangent:Vector2, lineStart:Vector2, lineEnd:Vector2):void {
+    if (this.areArrowVisible) {
       //TODO yin: account for arrowWidth
-      Point arrowBase = tangent * arrowSize_none;
-      num angle = 20/180*PI;
+      var arrowBase:Vector2 = tangent.mult(this.settings.arrowSize_none);
+      var angle = this.settings.arrowAngle;
       ctx.beginPath();
       // TODO(yin): compute angle here
       // ... no better compute the tranform paramters, which ever they are...
       // e.g.:    ctx.transform(matrix); ...; ctx.identity();
-      _drawRotatedLine(ctx, edgeEnd, arrowBase, angle);
-      _drawRotatedLine(ctx, edgeEnd, arrowBase, -angle);
-      applyStyle(ctx, edge, subStyle: #arrow);
+      this._drawRotatedLine(ctx, lineEnd, arrowBase, angle);
+      this._drawRotatedLine(ctx, lineEnd, arrowBase, -angle);
+      this.applyStyle(ctx, edge);
       ctx.stroke();
-      if (tag.model.graphType == #bidirectional) {
+      if (this.model.isUndirected) {
         ctx.beginPath();
-        arrowBase = tangent * -arrowSize_none;
-        _drawRotatedLine(ctx, edgeStart, arrowBase, angle);
-        _drawRotatedLine(ctx, edgeStart, arrowBase, -angle);
+        arrowBase = tangent * - this.settings.arrowSize_none;
+        this._drawRotatedLine(ctx, lineStart, arrowBase, angle);
+        this._drawRotatedLine(ctx, lineStart, arrowBase, -angle);
         ctx.stroke();
       }
     }
   }
 
-  void _drawRotatedLine(CanvasRenderingContext2D ctx, Point center, Point base,
-                        num angle) {
-    Point rotated  = new Point(base.x*cos(angle) - base.y*sin(angle),
-        base.x*sin(angle) + base.y*cos(angle));
-    Point end = center - rotated;
+  _drawRotatedLine(ctx:CanvasRenderingContext2D, center:Vector2, base:Vector2, angle:number):void {
+    var rotated = base.rotate(angle);
+    var end = center - rotated;
     ctx.moveTo(center.x, center.y);
     ctx.lineTo(end.x, end.y);
   }
 
-  void applyStyle(CanvasRenderingContext2D ctx, dynamic object, {subStyle : null}) {
-    if (object is GraphEdge) {
+  //TODO yin: Move to a separate class GRStyleManager
+  applyStyle(ctx:CanvasRenderingContext2D, object:any, subStyle = null) {
+    ctx.strokeStyle = this.settings.arrowStroke_none;
+    ctx.lineWidth = this.settings.edgeWidth_none + this.settings.arrowWidthIncrement_none;
+  /*
+    if (object instanceof GraphEdge) {
       if (subStyle == #arrow) {
         if (tag.selected == object) {
           ctx.strokeStyle = arrowStroke_selected;
@@ -284,9 +254,60 @@ class GraphRenderer {
         ctx.lineWidth = nodeWidth_none;
       }
     }
+    */
   }
-*/
-  public clear() {
-    this.ctx.clearRect(0, 1, this.width-1, this.height-1);
+
+  clear():void {
+    this.ctx.clearRect(0, 1, this.settings.width-1, this.settings.height-1);
   }
+
+  private getNode(node:NodeId):GraphNode {
+    return this.model.getNode(node);
+  }
+
+  private get areArrowVisible() {
+    return this.settings.arrowSize_none > 0 /*|| this.arrowSize_selected > 0|| this.arrowSize_path > 0*/;
+  };
+}
+
+export class GraphCanvasSettings {
+  width:number;
+  height:number;
+
+  nodeRadius_none = 10
+  edgeWidth_none = 1;
+  arrowSize_none = 16;
+  arrowStroke_none = '#000000';
+  arrowWidthIncrement_none = 0;
+  arrowAngle = 20/180*Math.PI;
+
+  /*
+   GraphCanvasTag tag;
+   GraphRenderer(GraphCanvasTag tag) : tag = tag;
+   String backgroundFill = '#ffffff';
+   String edgeStroke_none = '#000000';
+   String edgeStroke_selected = '#606060';
+   String edgeStroke_path = '#000000';
+   num edgeWidth_none = 1;
+   num edgeWidth_selected = 2;
+   num edgeWidth_path = 2;
+   String arrowStroke_none = '#000000';
+   String arrowStroke_selected = '#000000';
+   String arrowStroke_path = '#000000';
+   num arrowSize_none = 16;
+   num arrowSize_selected = 16;
+   num arrowSize_path = 16;
+   num arrowWidthIncrement_none = 0;
+   num arrowWidthIncrement_selected = 1;
+   num arrowWidthIncrement_path = 1;
+   String nodeStroke_none = '#303030';
+   String nodeStroke_selected = '#303030';
+   String nodeStroke_path = '#303030';
+   String nodeFill_none = '#d94040';
+   String nodeFill_selected = '#80d080';
+   String nodeFill_path = '#d94040';
+   num nodeWidth_none = 1;
+   num nodeWidth_selected = 2;
+   num nodeWidth_path = 3;
+   */
 }
