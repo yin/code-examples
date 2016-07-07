@@ -7,6 +7,7 @@ enum GraphOrientation {
 
 interface BasicGraph {
   orientation:GraphOrientation;
+  nodes:GraphNode[];
   hasNode(node : NodeId) : boolean;
   getNode(node : NodeId) : GraphNode;
   forNodes(callback : (NodeId) => any);
@@ -42,6 +43,8 @@ class GraphModel implements BasicGraph, EditableGraph{
   _lastNodeId : number = 0;
 
   constructor(public orientation : GraphOrientation) {}
+
+  get nodes() { return this.nodes; }
 
   /**
    * Creates a graph node and adds it into the graph.
