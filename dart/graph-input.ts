@@ -3,20 +3,52 @@ import {Vector2} from "../typescript/vector2";
 import {GraphModel} from "../typescript/graph-model";
 import {GraphCanvasSettings} from "../typescript/graph-canvas";
 import {GraphNode} from "../typescript/graph-model";
+import {GraphCanvasControl} from "../typescript/graph-canvas";
+
 enum CanvasArea {
   Inside, Left,  Right, Top, Bottom, Corner
 }
 
-interface InputStrategy {
-  select(GraphNode node):void;
-  mouseDown(Event event):void;
-  mouseUp(Event event):void;
-  mouseMove(Event event):void;
-}
-export class GraphCanvasInputHandler {
-  private debug = false;
+const FREE_STATE = new FreeInputState();
+const DRAGGING_STATE = new DraggingInputState();
+const PATH_START_STATE = new PathStartInputState();
+const PATH_END_STATE = new PathEndInputState();
 
-  constructor(private model:GraphModel, private settings:GraphCanvasSettings) {
+interface InputHandler {
+  select(node:GraphNode):void;
+  mouseDown(event:Event):void;
+  mouseUp(event:Event):void;
+  mouseMove(event:Event):void;
+}
+interface GraphCanvasAccess {
+  canvasArea(position:Vector2):CanvasArea;
+  getNodeAt(position:Vector2):GraphNode;
+}
+interface InputHandlerStrategy {
+  setStrategy(inputHandler:InputHandler);
+  setSelection(selection:Selection);
+}
+export class GraphCanvasInputHandler implements InputHandlerStrategy, GraphCanvasAccess {
+  private debug = false;
+  private inputHandler:InputHandler;
+
+  constructor(private model:GraphModel, private control:GraphCanvasControl, private settings:GraphCanvasSettings) {
+  }
+
+  onMouseDown(event:Event) {
+    this.inputHandler.mouseDown(event);
+  }
+  onMouseUp(event:Event) {
+    this.inputHandler.mouseUp(event);
+  }
+  onMouseMove(event:Event) {
+    this.inputHandler.mouseMove(event);
+  }
+  setStrategy(inputHandler:InputHandler) {
+    this.inputHandler = inputHandler;
+  }
+  setSelection(selection:Selection) {
+    this.control.setSelection(selection);
   }
 
   canvasArea(position:Vector2):CanvasArea {
@@ -57,42 +89,101 @@ export class GraphCanvasInputHandler {
   }
 }
 
-class FreeInputState implements InputStrategy {
+abstract class BaseInputState implements InputHandler {
+  constructor(public inputHandler:GraphCanvasInputHandler, public access:GraphCanvasAccess) {
+  }
+
   mouseDown(event:Event):void {
-  var mouseEvent = event as MouseEvent;
-  var position = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
-  var area = graph.canvasArea(position);
-  if (graph.canvasArea(position) == #inside) {
-  GraphNode node = graph.getNodeAt(position);
-  if (node != null) {
-  if (!mouseEvent.ctrlKey && !mouseEvent.altKey) {
-  if (node != graph.selected) {
-  select(node);
-} else {
-  graph.select(null);
-}
-} else if (mouseEvent.ctrlKey || mouseEvent.altKey) {
-  graph.createEdge(graph.selected, node);
-  if (mouseEvent.altKey) {
-    graph.select(node);
+    var mouseEvent = event as MouseEvent;
+    var position = new Vector2(mouseEvent.offsetX, mouseEvent.offsetY);
+    var area = this.inputHandler.canvasArea(position);
+    if (area == CanvasArea.Inside) {
+      var node = graph.getNodeAt(position);
+      if (node != null) {
+        if (!mouseEvent.ctrlKey && !mouseEvent.altKey) {
+          if (node != graph.selected) {
+            select(node);
+          } else {
+            graph.select(null);
+          }
+        } else if (mouseEvent.ctrlKey || mouseEvent.altKey) {
+          graph.createEdge(graph.selected, node);
+          if (mouseEvent.altKey) {
+            graph.select(node);
+          }
+        }
+      }
+    }
+    if (debug) {
+      var selected = graph.selected;
+      print('down > $state $selected');
+    }
+    graph.renderer.draw();
+    window.location.hash = lastHash = graph.model.toString();
+
   }
-}
-} else {
-  if (state != #path_start && state != #path.end) {
-    state = #dragging;
-    graph.createNode({'position': position});
-    graph.select(graph.lastNode);
-  }
-}
-}
-if (debug) {
-  var selected = graph.selected;
-  print('down > $state $selected');
-}
-graph.renderer.draw();
-window.location.hash = lastHash = graph.model.toString();
 }
 
+class FreeInputState extends BaseInputState {
+  constructor(inputHandler:GraphCanvasInputHandler, access:GraphCanvasAccess) {
+    super(inputHandler, access)
+  }
+
+  select(node:GraphNode) {
+  }
+  mouseDown(event:Event):void {
+    var area = this.inputHandler.canvasArea(position);
+    if (area == CanvasArea.Inside) {
+      var node = this.graph.getNodeAt(position);
+      if (node != null) {
+        this.select(node);
+      } else {
+        this.
+      }
+    }
+  }
+  mouseUp(event:Event) {
+  }
+  mouseMove(event:Event) {
+  }
+}
+
+class DraggingInputState implements InputHandler {
+  select(node:GraphNode) {
+  }
+  mouseUp(event:Event) {
+  }
+  mouseMove(event:Event) {
+  }
+  mouseDown(event:Event):void {
+
+  }
+}
+
+abstract class BasePathInputState extends BaseInputState {
+  mouseDown(event:Event) {
+  }
+}
+class PathStartInputState implements InputHandler {
+  select(node:GraphNode) {
+  }
+  mouseUp(event:Event) {
+  }
+  mouseMove(event:Event) {
+  }
+  mouseDown(event:Event):void {
+  }
+}
+
+class PathEndInputState implements InputHandler {
+  select(node:GraphNode) {
+  }
+  mouseUp(event:Event) {
+  }
+  mouseMove(event:Event) {
+  }
+  mouseDown(event:Event):void {
+  }
 }
 
 void start(event) {

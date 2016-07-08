@@ -3,6 +3,7 @@ import {GraphEdge} from "./graph-model";
 import {NodeId} from "./graph-model";
 import {Vector2} from "./vector2";
 import {GraphModel} from "./graph-model";
+import {GraphEdit} from "./graph-model";
 
 interface Selection {
   remove():Selection;
@@ -46,7 +47,7 @@ class EdgeSelection implements Selection {
 export class GraphCanvasControl {
   debug = false;
   model:GraphModel;
-  selecton:Selection = EmptySelection.singleton;
+  selection:Selection = EmptySelection.singleton;
 
   /*
   List<dynamic> path;
@@ -56,11 +57,15 @@ export class GraphCanvasControl {
   constructor(private canvas:HTMLCanvasElement, private renderer:GraphRenderer) {
   }
 
-  get model() { return this._model };
+  get model() { return this.model };
   set model(model:GraphModel) {
     this.model = model;
-    selected = null;
-    renderer.draw();
+    this.selection = EmptySelection.singleton;
+  }
+
+  /** Refreshes the canvas screen */
+  update() {
+    this.renderer.draw(this.model, this.canvas.getContext("2d"));
   }
 /*
   @override
@@ -118,6 +123,32 @@ export class GraphCanvasControl {
     return false;
   }
   */
+  setSelection(selection:Selection):void {
+    this.selection = selection;
+  }
+}
+
+export class GraphCanvasEdit implements GraphEdit {
+  constructor(private control:GraphCanvasControl) {}
+
+  createNode(properties:Object):GraphNode {
+    var ret = this.control.model.createNode(properties);
+    this.control.update();
+    return
+  }
+
+  removeNode(node:NodeId):boolean {
+    return undefined;
+  }
+
+  createEdge(start:NodeId, end:NodeId, properties:Object):boolean {
+    return undefined;
+  }
+
+  removeEdge(start:NodeId, end:NodeId):boolean {
+    return undefined;
+  }
+
 }
 
 const TWO_PI = 2*Math.PI;
