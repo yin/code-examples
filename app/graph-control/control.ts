@@ -1,6 +1,6 @@
-import {BasicGraph,GraphNode,GraphEdge,NodeId,GraphModel,GraphEdit} from "./../graph-model/graph-model";
+import {BasicGraph,GraphNode,GraphEdge,NodeId,GraphModel,GraphEdit} from "../graph-model/graph-model";
 import {GraphSelection, EmptySelection} from "./selection";
-import {Render} from "./render";
+import {GraphRenderer} from "./renderer";
 import {GraphCanvasInputHandler} from "./input";
 import {Commands,CommandsImpl} from "./commands";
 import {Vector2} from "./util/vector2";
@@ -9,7 +9,7 @@ import {Vector2} from "./util/vector2";
 export class ControlFactory {
   create(canvas:HTMLCanvasElement) {
     var settings = new GraphControlSettings();
-    var render = new Render(settings);
+    var render = new GraphRenderer(settings);
     var commands = new CommandsImpl();
     var control = new CanvasControl(canvas, render, commands);
     var inputHandler = new GraphCanvasInputHandler(control, settings);
@@ -26,7 +26,7 @@ export class CanvasControl {
   selection:GraphSelection = EmptySelection.singleton;
   edit:GraphEdit;
 
-  constructor(private canvas:HTMLCanvasElement, private render:Render, public commands:Commands) {
+  constructor(private canvas:HTMLCanvasElement, private render:GraphRenderer, public commands:Commands) {
   }
 
   get model() { return this._model };

@@ -1,3 +1,4 @@
 import { bootstrap }    from '@angular/platform-browser-dynamic';
-import { AppComponent } from './app.component';
-bootstrap(AppComponent);
+import { GraphEditor } from './graph-editor';
+import {GraphCanvas} from "./graph-canvas";
+bootstrap(GraphEditor, [GraphCanvas]);

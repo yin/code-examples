@@ -78,11 +78,13 @@ export class GraphAdjacencyListImpl implements GraphAdjacencyList, GraphAdjacenc
 
     forNodeEdges(start : NodeId, callback : (GraphEdge, number) => any) {
         var nodeEdges = this.adjacency[start];
-        for (var end of nodeEdges) {
-            try {
-                callback(start, end);
-            } catch (result) {
-                return result;
+        if (Array.isArray(nodeEdges)) {
+            for (var end of nodeEdges) {
+                try {
+                    callback(start, end);
+                } catch (result) {
+                    return result;
+                }
             }
         }
     }
@@ -137,15 +139,24 @@ export class GraphAdjacencyListImpl implements GraphAdjacencyList, GraphAdjacenc
 
     private addEdge(start:NodeId, end:NodeId, edge:GraphEdge):boolean {
         if (!this.hasEdge(start, end)) {
-            this.adjacency[start].push(end);
-            this.edges[start].push(edge);
+            this._AddEdge(start, end, edge);
             // TODO yin: Separate directianality logic into strategies
             if (this.graph.isUndirected) {
-                this.adjacency[end].push(start)
-                this.edges[end].push(edge);
+                this._AddEdge(end, start, edge);
             }
             return true;
         }
         return false;
     }
+
+    private _AddEdge(start, end, edge){
+            if (!this.adjacency[start]) {
+                this.adjacency[start] = [];
+            }
+            if (!this.edges[start]) {
+                this.edges[start] = [];
+            }
+            this.adjacency[start].push(end);
+            this.edges[start].push(edge);
+        };
 }

@@ -4,10 +4,9 @@ import {Vector2} from "./util/vector2";
 
 const TWO_PI = 2 * Math.PI;
 
-export class Render {
+export class GraphRenderer {
   debug = false;
   private model:BasicGraph;
-  private ctx:CanvasRenderingContext2D;
 
   constructor(private settings:GraphControlSettings) {
   }
@@ -20,7 +19,7 @@ export class Render {
     // Misusing instance fields here
     this.model = model;
     ctx['imageSmoothingEnabled'] = true;
-    this.clear();
+    this.clear(ctx);
 
     model.forNodes((node) => {
       this.drawNode(ctx, node);
@@ -140,8 +139,8 @@ export class Render {
      */
   }
 
-  clear():void {
-    this.ctx.clearRect(0, 1, this.settings.width - 1, this.settings.height - 1);
+  clear(ctx:CanvasRenderingContext2D):void {
+    ctx.clearRect(0, 1, this.settings.width - 1, this.settings.height - 1);
   }
 
   private getNode(node:NodeId):GraphNode {
