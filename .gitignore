@@ -4,3 +4,4 @@ systemjs.config.js
 dart/
 node_modules/
 typings/
+*.js
