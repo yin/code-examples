@@ -25,8 +25,10 @@ export interface BasicGraph {
 export interface GraphEdit {
   createNode(properties:Object):GraphNode;
   removeNode(node:NodeId):boolean;
+  mergeNode(node:GraphNode, properties:Object);
   createEdge(start:NodeId, end:NodeId, properties:Object):boolean;
   removeEdge(start:NodeId, end:NodeId):boolean;
+  mergeEdge(edge:GraphEdge, properties:Object);
 }
 
 /**
@@ -50,6 +52,10 @@ export class GraphModel implements BasicGraph, GraphEdit {
 
   get nodes() {
     return this.nodes;
+  }
+
+  get edit() {
+    return this;
   }
 
   /** Returns adjacency list representation of Graph edges. There might be others implemented
@@ -109,6 +115,9 @@ export class GraphModel implements BasicGraph, GraphEdit {
     return false;
   }
 
+  mergeNode(node:GraphNode, properties:Object) {
+  }
+
   hasNode(node:NodeId):boolean {
     return true === this.forNodes((n) => {
           if (n.id == node) {
@@ -142,8 +151,21 @@ export class GraphModel implements BasicGraph, GraphEdit {
     }
     return false;
   }
+
   removeEdge(start:NodeId, end:NodeId):boolean {
     return this.adjacency.removeEdge(start, end);
+  }
+
+  mergeEdge(edge:GraphEdge, properties:Object) {
+    this.merge(properties, edge.properties);
+  }
+
+  private merge(from:Object, into:Object) {
+    for (var i in from) {
+      if (from.hasOwnProperty(i)) {
+        into[i] = from[i];
+      }
+    }
   }
 
   toString() {
