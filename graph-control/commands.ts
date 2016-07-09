@@ -1,11 +1,8 @@
+import {NodeId,GraphEdge,GraphNode,GraphModel,GraphEdit} from "../graph-model/graph-model";
 import {CanvasControl} from "./control";
-import {GraphEdge} from "../graph-model";
-import {NodeId} from "../graph-model";
-import {GraphNode} from "../graph-model";
-import {GraphModel} from "../graph-model";
-import {GraphEdit} from "../graph-model";
+import {GraphSelection} from "./selection";
 
-/** EditFunction's are command callbacks, which change the graph model somehow. */
+/** EditFunction's are command callbacks, which change the graph _model somehow. */
 type EditFunction = (GraphControlEdit)=>void;
 
 /**
@@ -16,7 +13,7 @@ type EditFunction = (GraphControlEdit)=>void;
  */
 export interface Commands {
   /** Sets current selection, how things get selected (stack cycling) is not part of this state */
-  select(Selection);
+  select(selection:GraphSelection);
   /** Handles node and edge creation and removal, moving nodes around */
   updateModel(transform:(GraphControlEdit) => void);
   /** Executes an arbitrary command and places in into undo stack */
@@ -43,7 +40,7 @@ export class CommandsImpl implements Commands {
     this.control = control;
   }
 
-  select(selection:Selection) {
+  select(selection:GraphSelection) {
     this.execute(new SetSelectionCommand(this.control, selection))
   }
 
@@ -58,8 +55,8 @@ export class CommandsImpl implements Commands {
 }
 
 class SetSelectionCommand implements ICommand {
-  private before:Selection;
-  constructor(private control:CanvasControl, private after:Selection) {}
+  private before:GraphSelection;
+  constructor(private control:CanvasControl, private after:GraphSelection) {}
   redo() {
     this.before = this.control.selection;
     this.control.setSelection(this.after);
@@ -77,7 +74,7 @@ class EditCommand {
     this.transform(this.control.edit);
   }
   undo() {
-    // TODO yin: Undo function should use the proxy to restore affected parts of the model
+    // TODO yin: Undo function should use the proxy to restore affected parts of the _model
   }
 }
 

@@ -34,9 +34,10 @@ export class Vector2 {
     return Math.sqrt(this.lengthSquared)
   }
 
-  rotate(angle:Number):any {
+  rotate(angle:number):Vector2 {
+    var cosa = Math.cos(angle), sina = Math.sin(angle);
     return new Vector2(
-        this.x*Math.cos(angle) - this.y*Math.sin(angle),
-        this.x*Math.sin(angle) + this.y*Math.cos(angle));
+        this.x * cosa - this.y * sina,
+        this.x * sina + this.y * cosa);
   }
 }

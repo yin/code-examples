@@ -1,9 +1,6 @@
-import {NodeId} from "../graph-model";
-import {GraphNode} from "../graph-model";
+import {NodeId,GraphNode,BasicGraph,GraphEdge} from "../graph-model/graph-model";
 import {GraphControlSettings} from "./control";
-import {BasicGraph} from "../graph-model";
-import {GraphEdge} from "../graph-model";
-import {Vector2} from "../vector2";
+import {Vector2} from "./util/vector2";
 
 const TWO_PI = 2 * Math.PI;
 
@@ -12,7 +9,8 @@ export class Render {
   private model:BasicGraph;
   private ctx:CanvasRenderingContext2D;
 
-  constructor(private settings:GraphControlSettings) {}
+  constructor(private settings:GraphControlSettings) {
+  }
 
   draw(model:BasicGraph, ctx:CanvasRenderingContext2D) {
     if (this.debug) {
@@ -80,7 +78,7 @@ export class Render {
       ctx.stroke();
       if (this.model.isUndirected) {
         ctx.beginPath();
-        arrowBase = tangent * - this.settings.arrowSize_none;
+        var arrowBase = tangent.mult(-this.settings.arrowSize_none);
         this._drawRotatedLine(ctx, lineStart, arrowBase, angle);
         this._drawRotatedLine(ctx, lineStart, arrowBase, -angle);
         ctx.stroke();
@@ -90,7 +88,7 @@ export class Render {
 
   _drawRotatedLine(ctx:CanvasRenderingContext2D, center:Vector2, base:Vector2, angle:number):void {
     var rotated = base.rotate(angle);
-    var end = center - rotated;
+    var end = center.sub(rotated);
     ctx.moveTo(center.x, center.y);
     ctx.lineTo(end.x, end.y);
   }
@@ -143,7 +141,7 @@ export class Render {
   }
 
   clear():void {
-    this.ctx.clearRect(0, 1, this.settings.width-1, this.settings.height-1);
+    this.ctx.clearRect(0, 1, this.settings.width - 1, this.settings.height - 1);
   }
 
   private getNode(node:NodeId):GraphNode {

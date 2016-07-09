@@ -1,14 +1,9 @@
-import {BasicGraph, GraphNode} from "../graph-model"
-import {GraphEdge} from "./../graph-model";
-import {NodeId} from "./../graph-model";
-import {Vector2} from "./../vector2";
-import {GraphModel} from "./../graph-model";
-import {GraphEdit} from "./../graph-model";
-import {EmptySelection} from "./selection";
+import {BasicGraph,GraphNode,GraphEdge,NodeId,GraphModel,GraphEdit} from "./../graph-model/graph-model";
+import {GraphSelection, EmptySelection} from "./selection";
 import {Render} from "./render";
 import {GraphCanvasInputHandler} from "./input";
-import {CommandsImpl} from "./commands";
-import {Commands} from "./commands";
+import {Commands,CommandsImpl} from "./commands";
+import {Vector2} from "./util/vector2";
 
 /** Constructs CanvasControl and all associated services. This would be a good place to use DI. */
 export class ControlFactory {
@@ -27,26 +22,26 @@ export class ControlFactory {
  */
 export class CanvasControl {
   debug = false;
-  model:GraphModel;
-  selection:Selection = EmptySelection.singleton;
+  private _model:GraphModel;
+  selection:GraphSelection = EmptySelection.singleton;
   edit:GraphEdit;
 
   constructor(private canvas:HTMLCanvasElement, private render:Render, public commands:Commands) {
   }
 
-  get model() { return this.model };
+  get model() { return this._model };
   set model(model:GraphModel) {
-    this.model = model;
+    this._model = model;
     this.edit = model.edit;
     this.selection = EmptySelection.singleton;
   }
 
   /** Refreshes the canvas screen */
   update() {
-    this.render.draw(this.model, this.canvas.getContext("2d"));
+    this.render.draw(this._model, this.canvas.getContext("2d"));
   }
 
-  setSelection(selection:Selection):void {
+  setSelection(selection:GraphSelection):void {
     this.selection = selection;
   }
 }

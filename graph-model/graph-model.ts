@@ -1,6 +1,4 @@
-import {GraphAdjacencyListImpl} from 'graph-adjacency.ts';
-import {GraphAdjacencyList} from "./graph-adjacency";
-import {GraphAdjacencyEdit} from "./graph-adjacency";
+import {GraphAdjacencyListImpl, GraphAdjacencyList, GraphAdjacencyEdit} from "./graph-adjacency";
 
 export type NodeId = number;
 export type EdgeId = number;
@@ -20,6 +18,8 @@ export interface BasicGraph {
   forNodes(callback:(NodeId) => any);
   isUndirected:boolean;
   isDirected:boolean;
+  /** If this model is muttable, returns an instance of GraphEdit. */
+  edit:GraphEdit;
 }
 
 export interface GraphEdit {
@@ -48,10 +48,6 @@ export class GraphModel implements BasicGraph, GraphEdit {
   private _edgeCount = 0;
 
   constructor(public orientation:GraphOrientation) {
-  }
-
-  get nodes() {
-    return this.nodes;
   }
 
   get edit() {

@@ -1,11 +1,7 @@
-
-import {Vector2} from "../vector2";
-import {GraphModel} from "../graph-model";
-import {GraphControlSettings} from "control";
-import {GraphNode} from "../graph-model";
-import {CanvasControl} from "control";
-import {GraphEdit} from "../graph-model";
+import {GraphModel, GraphNode, GraphEdit} from "../graph-model/graph-model";
+import {GraphControlSettings, CanvasControl} from "./control";
 import {NodeSelection} from "./selection";
+import {Vector2} from "./util/vector2";
 
 enum CanvasArea {
   Inside, Left,  Right, Top, Bottom, Corner
@@ -89,6 +85,9 @@ export class GraphCanvasInputHandler implements InputHandlerStrategy, GraphCanva
 abstract class BaseInputState implements InputHandler {
   constructor(public inputHandler:GraphCanvasInputHandler, public access:GraphCanvasAccess,
               public control:CanvasControl) {}
+  mouseDown(e) {}
+  mouseUp(e) {}
+  mouseMove(e) {}
 }
 
 class FreeInputState extends BaseInputState {
@@ -111,10 +110,6 @@ class FreeInputState extends BaseInputState {
       }
     }
   }
-  mouseUp(event:MouseEvent) {
-  }
-  mouseMove(event:MouseEvent) {
-  }
 }
 
 class DraggingInputState extends BaseInputState {
@@ -135,9 +130,6 @@ class DraggingInputState extends BaseInputState {
       transformEdge: (edge, edit) => {}
     });
   }
-
-  mouseDown(event:MouseEvent):void {
-  }
 }
 
 /** State for selecting start node for path finding algorithm. This is TBD. */
@@ -149,7 +141,7 @@ class PathStartInputState extends BaseInputState {
   }
   mouseMove(event:MouseEvent) {
   }
-  mouseDown(event:MouseEvent):void {
+  mouseDown(event:MouseEvent) {
   }
 }
 
@@ -162,7 +154,7 @@ class PathEndInputState extends BaseInputState {
   }
   mouseMove(event:MouseEvent) {
   }
-  mouseDown(event:MouseEvent):void {
+  mouseDown(event:MouseEvent) {
   }
 }
 
@@ -178,10 +170,10 @@ void start(event) {
     graph.onMouseUp.listen(mouseUp);
 
     (querySelector('#new-directed') as ButtonElement).onClick.listen((e) {
-      graph.model = new GraphModel(graphType: #oriented);
+      graph._model = new GraphModel(graphType: #oriented);
     });
     (querySelector('#new-undirected') as ButtonElement).onClick.listen((e) {
-      graph.model = new GraphModel(graphType: #bidirectional);
+      graph._model = new GraphModel(graphType: #bidirectional);
     });
     (querySelector('#find-path') as ButtonElement).onClick.listen((e) {
       state = #path_start;
@@ -235,7 +227,7 @@ void mouseDown(Event event) {
     print('down > $state $selected');
   }
   graph.renderer.draw();
-  window.location.hash = lastHash = graph.model.toString();
+  window.location.hash = lastHash = graph._model.toString();
 }
 
 void select(GraphNode node) {
@@ -249,7 +241,7 @@ void select(GraphNode node) {
     state = #free;
     GraphNode start = graph.selected;
     graph.select(node);
-    List<GraphNode> path = dijkstra(graph.model, start, node);
+    List<GraphNode> path = dijkstra(graph._model, start, node);
     graph.path = path;
   }
 }

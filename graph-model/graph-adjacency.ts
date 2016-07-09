@@ -1,10 +1,10 @@
-import {BasicGraph, NodeId, GraphNode, GraphEdge} from 'graph-model';
+import {BasicGraph, NodeId, GraphNode, GraphEdge} from './graph-model';
 
 export interface GraphAdjacency {
     hasEdge(start:NodeId, end:NodeId):boolean;
     getEdge(start:NodeId, end:NodeId):GraphEdge;
-    forAllEdges(callback:(number, number) => any):any;
-    forNodeEdges(start : NodeId, callback:(number, number) => any):any;
+    forAllEdges(callback:(edge:GraphEdge, index:number) => any):any;
+    forNodeEdges(start : NodeId, callback:(edge:GraphEdge, index:number) => any):any;
 }
 
 export interface GraphAdjacencyEdit {
@@ -111,7 +111,10 @@ export class GraphAdjacencyListImpl implements GraphAdjacencyList, GraphAdjacenc
 
     private _removeEdge(start:NodeId, end:NodeId):boolean {
         var startAdj = this.adjacency[start];
-        for (var index in startAdj) {
+        for (var i in startAdj) {
+            var index = Number(i);
+            if (index === NaN)
+                continue;
             if (startAdj[index] == end) {
                 // We don't allow duplicate edges, cut it here
                 return this._removeEdgeAtIndex(start, index);
@@ -120,7 +123,7 @@ export class GraphAdjacencyListImpl implements GraphAdjacencyList, GraphAdjacenc
         return false;
     }
 
-    private _removeEdgeAtIndex(start:NodeId, index:number):boolean {
+    _removeEdgeAtIndex(start:NodeId, index:number):boolean {
         var startAdj = this.adjacency[start];
         if (startAdj[index]) {
             delete startAdj[index];
