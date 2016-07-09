@@ -5,11 +5,12 @@ import {GraphNode} from "../graph-model";
 import {GraphModel} from "../graph-model";
 import {GraphEdit} from "../graph-model";
 
+/** EditFunction's are command callbacks, which change the graph model somehow. */
 type EditFunction = (GraphControlEdit)=>void;
 
 /**
  * Provides easy access to common commands, this is to provide undo/redo functionality
- * in the future. Commands are actions done in the control, which change its state (like
+ * in the future. Commands are actions done in the commands, which change its state (like
  * creating a node, changing selection) with loss of arbitrary data. Changing selected
  * tool does not fall to this category.
  */

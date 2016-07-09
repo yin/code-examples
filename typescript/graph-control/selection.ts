@@ -1,10 +1,17 @@
 import {GraphEdge} from "../graph-model";
 import {BasicGraph} from "../graph-model";
 import {GraphNode} from "../graph-model";
+import {GraphEdit} from "../graph-model";
+
+/** Temporary interface for operations over selections */
+export interface SelectionTransformation {
+  transformNode(node:GraphNode, edit:GraphEdit);
+  transformEdge(node:GraphNode, edit:GraphEdit);
+}
 
 export interface Selection {
   remove():Selection;
-  setProperty(key:string, value:Object);
+  transform(transform:SelectionTransformation);
 }
 
 export class EmptySelection implements Selection {
@@ -14,7 +21,8 @@ export class EmptySelection implements Selection {
   remove():Selection {
     return EmptySelection.singleton;
   }
-  setProperty(key:string, value:Object) {
+
+  transform(transform:SelectionTransformation) {
   }
 }
 
@@ -24,8 +32,10 @@ export class NodeSelection implements Selection {
   remove():Selection {
     return EmptySelection.singleton;
   }
-  setProperty(key:string, value:Object) {
-    this.node.properties[key] = value;
+  transform(transform:SelectionTransformation) {
+    if (this.model instanceof GraphEdit) {
+      transform.transformNode(this.node, <GraphEdit>this.model);
+    }
   }
 }
 
@@ -39,7 +49,9 @@ export class EdgeSelection implements Selection {
       return this;
     }
   }
-  setProperty(key:string, value:Object) {
-    this.edge.properties[key] = value;
+  transform(transform:SelectionTransformation) {
+    if (this.model instanceof GraphEdit) {
+      transform.transformNode(this.edge, <GraphEdit>this.model);
+    }
   }
 }

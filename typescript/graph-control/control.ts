@@ -6,24 +6,32 @@ import {GraphModel} from "./../graph-model";
 import {GraphEdit} from "./../graph-model";
 import {EmptySelection} from "./selection";
 import {Render} from "./render";
+import {GraphCanvasInputHandler} from "./input";
+import {CommandsImpl} from "./commands";
+import {Commands} from "./commands";
 
+/** Constructs CanvasControl and all associated services. This would be a good place to use DI. */
 export class ControlFactory {
   create(canvas:HTMLCanvasElement) {
     var settings = new GraphControlSettings();
     var render = new Render(settings);
-    var control = new CanvasControl(canvas, render);
-    var inputHandler
+    var commands = new CommandsImpl();
+    var control = new CanvasControl(canvas, render, commands);
+    var inputHandler = new GraphCanvasInputHandler(control, settings);
     return control;
   }
 }
 
+/** Holds all components of the graph canvas and ensures proper updating of the display.
+ * This approach is not perfect, there are circular dependencies in the hierarchy.
+ */
 export class CanvasControl {
   debug = false;
   model:GraphModel;
   selection:Selection = EmptySelection.singleton;
   edit:GraphEdit;
 
-  constructor(private canvas:HTMLCanvasElement, private render:Render) {
+  constructor(private canvas:HTMLCanvasElement, private render:Render, public commands:Commands) {
   }
 
   get model() { return this.model };
