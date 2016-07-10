@@ -79,7 +79,7 @@ export class GraphModel implements BasicGraph, GraphEdit {
    */
   createNode(properties:Object):GraphNode {
     if (properties['position'] != null) {
-      var node = new GraphNode(++this._lastNodeId, properties);
+      var node = new GraphNode(this._lastNodeId++, properties);
       if (this.addNode(node)) {
         this._nodeCount++;
         return node;
@@ -105,7 +105,7 @@ export class GraphModel implements BasicGraph, GraphEdit {
 
   private addNode(node:GraphNode):boolean {
     if (node != null && !this.hasNode(node.id)) {
-      this.nodes.push(node);
+      this.nodes[node.id] = node;
       return true;
     }
     return false;

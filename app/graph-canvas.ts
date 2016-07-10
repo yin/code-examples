@@ -13,6 +13,7 @@ export class GraphCanvas {
   private height:number = 480;
   @ViewChild('canvas') canvas:ElementRef;
   private renderer:GraphRenderer;
+  private model:GraphModel;
 
   constructor() {
     var settings = new GraphControlSettings();
@@ -20,9 +21,17 @@ export class GraphCanvas {
   }
 
   setModel(model:GraphModel) {
+    this.model = model;
+  }
+
+  render():void {
     var canvas = <HTMLCanvasElement>this.canvas.nativeElement;
     var ctx = canvas.getContext("2d");
-    this.renderer.draw(model, ctx);
-    console.log(model);
+    this.renderer.draw(this.model, ctx);
+    console.log(this.model);
+  }
+
+  ngAfterViewChecked():void {
+    this.render();
   }
 }
