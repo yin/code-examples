@@ -49,39 +49,34 @@ export class CanvasControl {
 export class GraphControlSettings {
   width:number;
   height:number;
+  backgroundFill = '#ffffff';
 
   nodeRadius_none = 10
-  edgeWidth_none = 1;
-  arrowSize_none = 16;
-  arrowStroke_none = '#000000';
-  arrowWidthIncrement_none = 0;
-  arrowAngle = 20/180*Math.PI;
+  nodeStroke_none = '#303030';
+  nodeStroke_selected = '#303030';
+  nodeStroke_path = '#303030';
+  nodeFill_none = '#d94040';
+  nodeFill_selected = '#80d080';
+  nodeFill_path = '#d94040';
+  nodeWidth_none = 1;
+  nodeWidth_selected = 2;
+  nodeWidth_path = 3;
 
-  /*
-   String backgroundFill = '#ffffff';
-   String edgeStroke_none = '#000000';
-   String edgeStroke_selected = '#606060';
-   String edgeStroke_path = '#000000';
-   num edgeWidth_none = 1;
-   num edgeWidth_selected = 2;
-   num edgeWidth_path = 2;
-   String arrowStroke_none = '#000000';
-   String arrowStroke_selected = '#000000';
-   String arrowStroke_path = '#000000';
-   num arrowSize_none = 16;
-   num arrowSize_selected = 16;
-   num arrowSize_path = 16;
-   num arrowWidthIncrement_none = 0;
-   num arrowWidthIncrement_selected = 1;
-   num arrowWidthIncrement_path = 1;
-   String nodeStroke_none = '#303030';
-   String nodeStroke_selected = '#303030';
-   String nodeStroke_path = '#303030';
-   String nodeFill_none = '#d94040';
-   String nodeFill_selected = '#80d080';
-   String nodeFill_path = '#d94040';
-   num nodeWidth_none = 1;
-   num nodeWidth_selected = 2;
-   num nodeWidth_path = 3;
-   */
+  edgeStroke_none = '#000000';
+  edgeStroke_selected = '#606060';
+  edgeStroke_path = '#000000';
+  edgeWidth_none = 1;
+  edgeWidth_selected = 2;
+  edgeWidth_path = 2;
+
+  arrowStroke_none = '#000000';
+  arrowStroke_selected = '#000000';
+  arrowStroke_path = '#000000';
+  arrowSize_none = 16;
+  arrowSize_selected = 16;
+  arrowSize_path = 16;
+  arrowWidthIncrement_none = 0;
+  arrowWidthIncrement_selected = 1;
+  arrowWidthIncrement_path = 1;
+  arrowAngle = 20 / 180 * Math.PI;
 }
