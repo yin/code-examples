@@ -1,3 +1,4 @@
+import {Injectable, Inject} from "@angular/core";
 import {NodeId,GraphNode,BasicGraph,GraphEdge} from "../graph-model/graph-model";
 import {GraphControlSettings} from "./control";
 import {Vector2} from "./util/vector2";
@@ -8,12 +9,77 @@ const PATH_SEGMENT_CLASS = 'path-seg';
 const ARROW_PSEUDOCLASS = 'arrow';
 const BACKGROUND_PSEUDOCLASS = 'background';
 
+export class StyleProcessor {
+  constructor() {}
+
+  applyStyle(ctx:CanvasRenderingContext2D, s:GraphControlSettings, object:any, pseudoclass:string) {
+    var isSelected = (item:any) => {
+      var classes = item.properties['classes']
+      if (Array.isArray(classes)) {
+        return (<Array<string>>classes).includes(SELECTED_CLASS);
+      }
+    };
+    var isPathSegment = (item:any) => {
+      var classes = item.properties['classes']
+      if (Array.isArray(classes)) {
+        return (<Array<string>>classes).includes(PATH_SEGMENT_CLASS);
+      }
+    };
+    var isArrow = pseudoclass == ARROW_PSEUDOCLASS;
+
+    if (object instanceof GraphEdge) {
+      if (isArrow) {
+        if (isSelected(object)) {
+          ctx.strokeStyle = s.arrowStroke_selected;
+          ctx.lineWidth = s.edgeWidth_none + s.arrowWidthIncrement_selected;
+        } else if (isPathSegment(object)) {
+          ctx.strokeStyle = s.arrowStroke_path;
+          ctx.lineWidth = s.edgeWidth_path + s.arrowWidthIncrement_path;
+        } else {
+          ctx.strokeStyle = s.arrowStroke_none;
+          ctx.lineWidth = s.edgeWidth_none + s.arrowWidthIncrement_none;
+        }
+      } else {
+        if (isSelected(object)) {
+          ctx.strokeStyle = s.edgeStroke_selected;
+          ctx.lineWidth = s.edgeWidth_selected;
+        } else if (isPathSegment(object)) {
+          ctx.strokeStyle = s.edgeStroke_path;
+          ctx.lineWidth = s.edgeWidth_path;
+        } else {
+          ctx.strokeStyle = s.edgeStroke_none;
+          ctx.lineWidth = s.edgeWidth_none;
+        }
+      }
+    } else if (object instanceof GraphNode) {
+      if (isSelected(object)) {
+        ctx.fillStyle = s.nodeFill_selected;
+        ctx.strokeStyle = s.nodeStroke_selected;
+        ctx.lineWidth = s.nodeWidth_selected;
+      } else if (isPathSegment(object)) {
+        ctx.fillStyle = s.nodeFill_path;
+        ctx.strokeStyle = s.nodeStroke_path;
+        ctx.lineWidth = s.nodeWidth_path;
+      } else {
+        ctx.fillStyle = s.nodeFill_none;
+        ctx.strokeStyle = s.nodeStroke_none;
+        ctx.lineWidth = s.nodeWidth_none;
+      }
+    } else if (object === null) {
+      if (pseudoclass == BACKGROUND_PSEUDOCLASS) {
+        ctx.fillStyle = s.backgroundFill;
+      }
+    }
+  }
+}
+
 export class GraphRenderer {
   debug = false;
   private model:BasicGraph;
-  private styleProcessor = new StyleProcessor();
 
-  constructor(private settings:GraphControlSettings) {
+  constructor(
+      @Inject(GraphControlSettings) private settings:GraphControlSettings,
+      @Inject(StyleProcessor) private styleProcessor:StyleProcessor) {
   }
 
   draw(model:BasicGraph, ctx:CanvasRenderingContext2D) {
@@ -109,66 +175,4 @@ export class GraphRenderer {
   private get areArrowVisible() {
     return this.settings.arrowSize_none > 0 /*|| this.arrowSize_selected > 0|| this.arrowSize_path > 0*/;
   };
-}
-
-class StyleProcessor {
-  applyStyle(ctx:CanvasRenderingContext2D, s:GraphControlSettings, object:any, pseudoclass:string) {
-    var isSelected = (item:any) => {
-      var classes = item.properties['classes']
-      if (Array.isArray(classes)) {
-        return (<Array<string>>classes).includes(SELECTED_CLASS);
-      }
-    };
-    var isPathSegment = (item:any) => {
-      var classes = item.properties['classes']
-      if (Array.isArray(classes)) {
-        return (<Array<string>>classes).includes(PATH_SEGMENT_CLASS);
-      }
-    };
-    var isArrow = pseudoclass == ARROW_PSEUDOCLASS;
-
-    if (object instanceof GraphEdge) {
-      if (isArrow) {
-        if (isSelected(object)) {
-          ctx.strokeStyle = s.arrowStroke_selected;
-          ctx.lineWidth = s.edgeWidth_none + s.arrowWidthIncrement_selected;
-        } else if (isPathSegment(object)) {
-          ctx.strokeStyle = s.arrowStroke_path;
-          ctx.lineWidth = s.edgeWidth_path + s.arrowWidthIncrement_path;
-        } else {
-          ctx.strokeStyle = s.arrowStroke_none;
-          ctx.lineWidth = s.edgeWidth_none + s.arrowWidthIncrement_none;
-        }
-      } else {
-        if (isSelected(object)) {
-          ctx.strokeStyle = s.edgeStroke_selected;
-          ctx.lineWidth = s.edgeWidth_selected;
-        } else if (isPathSegment(object)) {
-          ctx.strokeStyle = s.edgeStroke_path;
-          ctx.lineWidth = s.edgeWidth_path;
-        } else {
-          ctx.strokeStyle = s.edgeStroke_none;
-          ctx.lineWidth = s.edgeWidth_none;
-        }
-      }
-    } else if (object instanceof GraphNode) {
-      if (isSelected(object)) {
-        ctx.fillStyle = s.nodeFill_selected;
-        ctx.strokeStyle = s.nodeStroke_selected;
-        ctx.lineWidth = s.nodeWidth_selected;
-      } else if (isPathSegment(object)) {
-        ctx.fillStyle = s.nodeFill_path;
-        ctx.strokeStyle = s.nodeStroke_path;
-        ctx.lineWidth = s.nodeWidth_path;
-      } else {
-        ctx.fillStyle = s.nodeFill_none;
-        ctx.strokeStyle = s.nodeStroke_none;
-        ctx.lineWidth = s.nodeWidth_none;
-      }
-    } else if (object === null) {
-      if (pseudoclass == BACKGROUND_PSEUDOCLASS) {
-        ctx.fillStyle = s.backgroundFill;
-      }
-    }
-  }
 }

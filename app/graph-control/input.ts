@@ -1,7 +1,8 @@
-import {GraphModel, GraphNode, GraphEdit} from "../graph-model/graph-model";
-import {GraphControlSettings, CanvasControl} from "./control";
+import {GraphModel, GraphNode, GraphEdit, BasicGraph} from "../graph-model/graph-model";
+import {GraphControlSettings, GraphProvider} from "./control";
 import {NodeSelection} from "./selection";
 import {Vector2} from "./util/vector2";
+import {Commands} from "./commands";
 
 enum CanvasArea {
   Inside, Left,  Right, Top, Bottom, Corner
@@ -17,19 +18,27 @@ interface GraphCanvasAccess {
   getNodeAt(position:Vector2):GraphNode;
 }
 interface InputHandlerStrategy {
+  provider:GraphProvider;
+  access:GraphCanvasAccess;
+  commands:Commands;
   setState(inputHandler:InputHandler);
 }
 export class GraphCanvasInputHandler implements InputHandlerStrategy, GraphCanvasAccess {
   private debug = false;
   private inputHandler:InputHandler;
 
-  public stateFree = new FreeInputState(this, this, this.control);
-  public stateDragging = new DraggingInputState(this, this, this.control);
-  public statePathStart = new PathStartInputState(this, this, this.control);
-  public statePathEnd = new PathEndInputState(this, this, this.control);
+  public stateFree = new FreeInputState(this);
+  public stateDragging = new DraggingInputState(this);
+  public statePathStart = new PathStartInputState(this);
+  public statePathEnd = new PathEndInputState(this);
 
-  constructor(private control:CanvasControl, private settings:GraphControlSettings) {
+  constructor(private _provider:GraphProvider, private _commands:Commands,
+              private settings:GraphControlSettings) {
   }
+
+  get provider() { return this._provider }
+  get access():GraphCanvasAccess { return this }
+  get commands() {return this._commands }
 
   onMouseDown(event:MouseEvent) {
     this.inputHandler.mouseDown(event);
@@ -67,7 +76,7 @@ export class GraphCanvasInputHandler implements InputHandlerStrategy, GraphCanva
   }
 
   getNodeAt(position:Vector2):GraphNode {
-    return this.control.model.forNodes((node) => {
+    return this.provider.model.forNodes((node) => {
       var delta:Vector2 = node.properties['position'].sub(position);
       var distanceSquared = delta.lengthSquared;
       if (this.debug) {
@@ -83,16 +92,18 @@ export class GraphCanvasInputHandler implements InputHandlerStrategy, GraphCanva
 }
 
 abstract class BaseInputState implements InputHandler {
-  constructor(public inputHandler:GraphCanvasInputHandler, public access:GraphCanvasAccess,
-              public control:CanvasControl) {}
+  constructor(public inputHandler:GraphCanvasInputHandler) {}
+  get provider() { return this.inputHandler.provider }
+  get access() { return this.inputHandler.access }
+  get commands() {return this.inputHandler.commands }
   mouseDown(e) {}
   mouseUp(e) {}
   mouseMove(e) {}
 }
 
 class FreeInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler, access:GraphCanvasAccess, control:CanvasControl) {
-    super(inputHandler, access, control)
+  constructor(inputHandler:GraphCanvasInputHandler) {
+    super(inputHandler)
   }
 
   mouseDown(event:MouseEvent):void {
@@ -101,10 +112,10 @@ class FreeInputState extends BaseInputState {
     if (area == CanvasArea.Inside) {
       var node = this.access.getNodeAt(position);
       if (node != null) {
-        this.control.setSelection(new NodeSelection(this.control.model, node));
+        this.provider.selection = new NodeSelection(this.provider.model, node);
         this.inputHandler.setState(this.inputHandler.stateDragging);
       } else {
-        this.control.commands.updateModel((edit:GraphEdit) => {
+        this.commands.updateModel((edit:GraphEdit) => {
           edit.createNode({position:position});
         });
       }
@@ -113,15 +124,15 @@ class FreeInputState extends BaseInputState {
 }
 
 class DraggingInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler, access:GraphCanvasAccess, control:CanvasControl) {
-    super(inputHandler, access, control)
+  constructor(inputHandler:GraphCanvasInputHandler) {
+    super(inputHandler)
   }
 
   mouseUp(event:MouseEvent) {
     this.inputHandler.setState(this.inputHandler.stateFree);
   }
   mouseMove(event:MouseEvent) {
-    this.control.selection.transform({
+    this.provider.selection.transform({
       transformNode: (node, edit) => {
         var position = node.properties['position'];
         var newposition = position.add(new Vector2(event.movementX, event.movementY))
@@ -134,8 +145,8 @@ class DraggingInputState extends BaseInputState {
 
 /** State for selecting start node for path finding algorithm. This is TBD. */
 class PathStartInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler, access:GraphCanvasAccess, control:CanvasControl) {
-    super(inputHandler, access, control)
+  constructor(inputHandler:GraphCanvasInputHandler) {
+    super(inputHandler)
   }
   mouseUp(event:MouseEvent) {
   }
@@ -147,8 +158,8 @@ class PathStartInputState extends BaseInputState {
 
 /** State for selecting start node for path finding algorithm. This is TBD. */
 class PathEndInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler, access:GraphCanvasAccess, control:CanvasControl) {
-    super(inputHandler, access, control)
+  constructor(inputHandler:GraphCanvasInputHandler) {
+    super(inputHandler)
   }
   mouseUp(event:MouseEvent) {
   }

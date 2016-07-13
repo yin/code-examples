@@ -47,7 +47,7 @@ export class GraphModel implements BasicGraph, GraphEdit {
   private _nodeCount = 0;
   private _edgeCount = 0;
 
-  constructor(public orientation:GraphOrientation) {
+  constructor(public orientation:GraphOrientation = GraphOrientation.Directed) {
   }
 
   get edit() {

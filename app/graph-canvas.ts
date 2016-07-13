@@ -1,34 +1,39 @@
-import {Component,ViewChild,ElementRef} from '@angular/core';
+import {Component,ViewChild,ElementRef,Injectable} from '@angular/core';
 import {GraphModel} from "./graph-model/graph-model";
-import {GraphRenderer} from "./graph-control/renderer";
-import {GraphControlSettings} from "./graph-control/control";
+import {GraphControlSettings, GraphProvider} from "./graph-control/control";
+import {GraphRenderer, StyleProcessor} from "./graph-control/renderer";
 
 @Component({
   selector: 'graph-canvas',
   inputs: ['width', 'height'],
-  template: '<canvas #canvas [attr.width]="width" [attr.height]="height"></canvas>'
+  template: `<canvas #canvas [attr.width]="width" [attr.height]="height"></canvas>`,
+  providers: [ GraphProvider, GraphControlSettings, StyleProcessor, GraphRenderer ]
 })
 export class GraphCanvas {
   private width:number = 640;
   private height:number = 480;
   @ViewChild('canvas') canvas:ElementRef;
-  private renderer:GraphRenderer;
-  private model:GraphModel;
 
-  constructor() {
-    var settings = new GraphControlSettings();
-    this.renderer = new GraphRenderer(settings);
+  constructor(private provider:GraphProvider, private renderer:GraphRenderer) {
+    provider.addModelListener(this.onModelChanged.bind(this))
   }
 
-  setModel(model:GraphModel) {
-    this.model = model;
+  get model() {
+    return this.provider.model;
   }
 
   render():void {
+    if (this.canvas)
     var canvas = <HTMLCanvasElement>this.canvas.nativeElement;
     var ctx = canvas.getContext("2d");
-    this.renderer.draw(this.model, ctx);
-    console.log(this.model);
+    if (ctx && this.model) {
+      this.renderer.draw(this.model, ctx);
+      console.log(this.model);
+    }
+  }
+
+  onModelChanged(model) {
+    this.render();
   }
 
   ngAfterViewChecked():void {

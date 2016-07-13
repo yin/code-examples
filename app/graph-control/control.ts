@@ -1,3 +1,4 @@
+import {Injectable} from "@angular/core";
 import {BasicGraph,GraphNode,GraphEdge,NodeId,GraphModel,GraphEdit} from "../graph-model/graph-model";
 import {GraphSelection, EmptySelection} from "./selection";
 import {GraphRenderer} from "./renderer";
@@ -7,42 +8,58 @@ import {Vector2} from "./util/vector2";
 
 /** Constructs CanvasControl and all associated services. This would be a good place to use DI. */
 export class ControlFactory {
-  create(canvas:HTMLCanvasElement) {
+/*  create(canvas:HTMLCanvasElement) {
     var settings = new GraphControlSettings();
     var render = new GraphRenderer(settings);
     var commands = new CommandsImpl();
-    var control = new CanvasControl(canvas, render, commands);
-    var inputHandler = new GraphCanvasInputHandler(control, settings);
-    return control;
-  }
+    var provider = new GraphProvider(canvas);
+    var inputHandler = new GraphCanvasInputHandler(provider, settings);
+    return provider;
+  }*/
 }
+
+type ModelCallback = (GraphModel)=>void;
 
 /** Holds all components of the graph canvas and ensures proper updating of the display.
  * This approach is not perfect, there are circular dependencies in the hierarchy.
  */
-export class CanvasControl {
+export class GraphProvider {
   debug = false;
   private _model:GraphModel;
-  selection:GraphSelection = EmptySelection.singleton;
-  edit:GraphEdit;
+  private _selection:GraphSelection = EmptySelection.singleton;
+  private modelListeners:ModelCallback[] = [];
 
-  constructor(private canvas:HTMLCanvasElement, private render:GraphRenderer, public commands:Commands) {
-  }
-
-  get model() { return this._model };
+  get model() {
+    if (!this._model)
+        this._model = new GraphModel();
+    return this._model;
+  };
   set model(model:GraphModel) {
     this._model = model;
-    this.edit = model.edit;
     this.selection = EmptySelection.singleton;
+    for(var listener of this.modelListeners) {
+      try {
+        listener.apply(this.model);
+      } catch (e) {
+        console.log("A model listener exception:", e);
+      }
+    }
   }
 
-  /** Refreshes the canvas screen */
-  update() {
-    this.render.draw(this._model, this.canvas.getContext("2d"));
+  get edit() { return this.model.edit };
+
+  get selection() :GraphSelection {
+    return this._selection;
+  };
+
+  /** */
+  set selection(selection:GraphSelection) {
+    this._selection = selection;
   }
 
-  setSelection(selection:GraphSelection):void {
-    this.selection = selection;
+  /** Registers a callback to be called when the model is updated by setting the property. */
+  addModelListener(onModelChange:ModelCallback){
+    this.modelListeners.push(onModelChange);
   }
 }
 

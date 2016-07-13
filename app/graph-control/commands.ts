@@ -1,5 +1,5 @@
 import {NodeId,GraphEdge,GraphNode,GraphModel,GraphEdit} from "../graph-model/graph-model";
-import {CanvasControl} from "./control";
+import {GraphProvider} from "./control";
 import {GraphSelection} from "./selection";
 
 /** EditFunction's are command callbacks, which change the graph _model somehow. */
@@ -34,18 +34,14 @@ export interface ICommand {
 }
 
 export class CommandsImpl implements Commands {
-  private control:CanvasControl;
-
-  setControl(control:CanvasControl) {
-    this.control = control;
-  }
+  constructor(private provider:GraphProvider) {}
 
   select(selection:GraphSelection) {
-    this.execute(new SetSelectionCommand(this.control, selection))
+    this.execute(new SetSelectionCommand(this.provider, selection))
   }
 
   updateModel(transform:EditFunction) {
-    this.execute(new EditCommand(this.control, transform))
+    this.execute(new EditCommand(this.provider, transform))
   }
 
   execute(command:ICommand) {
@@ -56,22 +52,22 @@ export class CommandsImpl implements Commands {
 
 class SetSelectionCommand implements ICommand {
   private before:GraphSelection;
-  constructor(private control:CanvasControl, private after:GraphSelection) {}
+  constructor(private provider:GraphProvider, private after:GraphSelection) {}
   redo() {
-    this.before = this.control.selection;
-    this.control.setSelection(this.after);
+    this.before = this.provider.selection;
+    this.provider.selection = this.after;
   }
   undo() {
-    this.control.setSelection(this.before);
+    this.provider.selection = this.before;
   }
 }
 
 class EditCommand {
-  constructor(private control:CanvasControl, private transform:EditFunction) {}
+  constructor(private provider:GraphProvider, private transform:EditFunction) {}
 
   redo() {
     // TODO yin: For undo to work, we need to wap GraphEdit into a recording proxy.
-    this.transform(this.control.edit);
+    this.transform(this.provider.edit);
   }
   undo() {
     // TODO yin: Undo function should use the proxy to restore affected parts of the _model
