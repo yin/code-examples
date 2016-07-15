@@ -1,8 +1,10 @@
+import {Inject,ElementRef} from "@angular/core";
 import {GraphModel, GraphNode, GraphEdit, BasicGraph} from "../graph-model/graph-model";
-import {GraphControlSettings, GraphProvider} from "./control";
+import {GraphCanvasSettings, GraphCanvasModel} from "./control";
 import {NodeSelection} from "./selection";
 import {Vector2} from "./util/vector2";
 import {Commands} from "./commands";
+import {CommandsImpl} from "./commands";
 
 enum CanvasArea {
   Inside, Left,  Right, Top, Bottom, Corner
@@ -18,30 +20,31 @@ interface GraphCanvasAccess {
   getNodeAt(position:Vector2):GraphNode;
 }
 interface InputHandlerStrategy {
-  provider:GraphProvider;
+  provider:GraphCanvasModel;
   access:GraphCanvasAccess;
   commands:Commands;
   setState(inputHandler:InputHandler);
 }
-export class GraphCanvasInputHandler implements InputHandlerStrategy, GraphCanvasAccess {
-  private debug = false;
-  private inputHandler:InputHandler;
-
+export class EditorInputHandler implements InputHandlerStrategy, GraphCanvasAccess {
   public stateFree = new FreeInputState(this);
   public stateDragging = new DraggingInputState(this);
   public statePathStart = new PathStartInputState(this);
   public statePathEnd = new PathEndInputState(this);
 
-  constructor(private _provider:GraphProvider, private _commands:Commands,
-              private settings:GraphControlSettings) {
-  }
+  private inputHandler:InputHandler = this.stateFree;
+
+  constructor(private _provider:GraphCanvasModel,
+              @Inject(CommandsImpl) private _commands:CommandsImpl,
+              @Inject(GraphCanvasSettings) public settings:GraphCanvasSettings) {}
 
   get provider() { return this._provider }
   get access():GraphCanvasAccess { return this }
   get commands() {return this._commands }
 
   onMouseDown(event:MouseEvent) {
+    console.log("mdown", this.inputHandler)
     this.inputHandler.mouseDown(event);
+    console.log(this.inputHandler)
   }
   onMouseUp(event:MouseEvent) {
     this.inputHandler.mouseUp(event);
@@ -79,20 +82,22 @@ export class GraphCanvasInputHandler implements InputHandlerStrategy, GraphCanva
     return this.provider.model.forNodes((node) => {
       var delta:Vector2 = node.properties['position'].sub(position);
       var distanceSquared = delta.lengthSquared;
-      if (this.debug) {
-        var id = node.id;
-        console.log('getNodeAt($position) node:$id delta:$delta dist^2:$distSquare '
-            + 'dist:$distance');
-      }
       if (distanceSquared <= 2 * this.settings.nodeRadius_none**2) {
         throw node;
       }
     });
   }
+
+  install(element:ElementRef):void {
+    var canvas = (<HTMLElement>element.nativeElement);
+    canvas.addEventListener("mousedown", this.onMouseDown.bind(this));
+    canvas.addEventListener("mouseup", this.onMouseUp.bind(this));
+    canvas.addEventListener("mousemove", this.onMouseMove.bind(this));
+  }
 }
 
 abstract class BaseInputState implements InputHandler {
-  constructor(public inputHandler:GraphCanvasInputHandler) {}
+  constructor(public inputHandler:EditorInputHandler) {}
   get provider() { return this.inputHandler.provider }
   get access() { return this.inputHandler.access }
   get commands() {return this.inputHandler.commands }
@@ -102,7 +107,7 @@ abstract class BaseInputState implements InputHandler {
 }
 
 class FreeInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler) {
+  constructor(inputHandler:EditorInputHandler) {
     super(inputHandler)
   }
 
@@ -124,7 +129,7 @@ class FreeInputState extends BaseInputState {
 }
 
 class DraggingInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler) {
+  constructor(inputHandler:EditorInputHandler) {
     super(inputHandler)
   }
 
@@ -145,7 +150,7 @@ class DraggingInputState extends BaseInputState {
 
 /** State for selecting start node for path finding algorithm. This is TBD. */
 class PathStartInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler) {
+  constructor(inputHandler:EditorInputHandler) {
     super(inputHandler)
   }
   mouseUp(event:MouseEvent) {
@@ -158,7 +163,7 @@ class PathStartInputState extends BaseInputState {
 
 /** State for selecting start node for path finding algorithm. This is TBD. */
 class PathEndInputState extends BaseInputState {
-  constructor(inputHandler:GraphCanvasInputHandler) {
+  constructor(inputHandler:EditorInputHandler) {
     super(inputHandler)
   }
   mouseUp(event:MouseEvent) {
@@ -168,130 +173,3 @@ class PathEndInputState extends BaseInputState {
   mouseDown(event:MouseEvent) {
   }
 }
-
-/*
-
-void start(event) {
-  try {
-    HtmlElement e = querySelector('#graph');
-    graph = e as GraphCanvasTag;
-    graph.initialize();
-    graph.onMouseMove.listen(mouseMove);
-    graph.onMouseDown.listen(mouseDown);
-    graph.onMouseUp.listen(mouseUp);
-
-    (querySelector('#new-directed') as ButtonElement).onClick.listen((e) {
-      graph._model = new GraphModel(graphType: #oriented);
-    });
-    (querySelector('#new-undirected') as ButtonElement).onClick.listen((e) {
-      graph._model = new GraphModel(graphType: #bidirectional);
-    });
-    (querySelector('#find-path') as ButtonElement).onClick.listen((e) {
-      state = #path_start;
-      graph.select(null);
-      graph.renderer.draw();
-    });
-    (querySelector('#reset-path') as ButtonElement).onClick.listen((e) {
-      graph.path = null;
-      graph.renderer.draw();
-    });
-    window.onPopState.listen(onHashChanged);
-    onHashChanged(null);
-  } catch(e) {
-    print (e);
-  }
-}
-
-void mouseDown(Event event) {
-  if (debug) {
-    var selected = graph.selected;
-    print('down $state $selected');
-  }
-  MouseEvent mouseEvent = event as MouseEvent;
-  Point position = mouseEvent.offset;
-  Symbol area = graph.canvasArea(position);
-  if (graph.canvasArea(position) == #inside) {
-    GraphNode node = graph.getNodeAt(position);
-    if (node != null) {
-      if (!mouseEvent.ctrlKey && !mouseEvent.altKey) {
-        if (node != graph.selected) {
-          select(node);
-        } else {
-          graph.select(null);
-        }
-      } else if (mouseEvent.ctrlKey || mouseEvent.altKey) {
-        graph.createEdge(graph.selected, node);
-        if (mouseEvent.altKey) {
-          graph.select(node);
-        }
-      }
-    } else {
-      if (state != #path_start && state != #path.end) {
-        state = #dragging;
-        graph.createNode({'position': position});
-        graph.select(graph.lastNode);
-      }
-    }
-  }
-  if (debug) {
-    var selected = graph.selected;
-    print('down > $state $selected');
-  }
-  graph.renderer.draw();
-  window.location.hash = lastHash = graph._model.toString();
-}
-
-void select(GraphNode node) {
-  if (state == #free || state == #selected) {
-    state = #dragging;
-    graph.select(node);
-  } else if (state == #path_start) {
-    state = #path_end;
-    graph.select(node);
-  } else if (state == #path_end) {
-    state = #free;
-    GraphNode start = graph.selected;
-    graph.select(node);
-    List<GraphNode> path = dijkstra(graph._model, start, node);
-    graph.path = path;
-  }
-}
-
-
-void mouseUp(Event event) {
-  if (debug)  {
-    var selected = graph.selected;
-    print('up $state $selected');
-  }
-  if (state == #dragging) {
-    state = #selected;
-    graph.renderer.draw();
-  }
-  if (debug)  {
-    var selected = graph.selected;
-    print('up > $state $selected');
-  }
-}
-
-void mouseMove(Event event) {
-  if (state == #dragging && graph.selected != null) {
-    Point delta = (event as MouseEvent).movement;
-    graph.selected.properties['position'] = graph.selected.properties['position'] + delta;
-    graph.renderer.draw();
-  }
-}
-
-void onHashChanged(PopStateEvent event) {
-  String hash = window.location.hash.toString().replaceFirst('#', '');
-  if (hash != lastHash) {
-    if (debug_hash) {
-      print("onHashChanged: newHash = $hash");
-    }
-    if (graph.parseString(hash)) {
-      state = #free;
-      graph.renderer.draw();
-    }
-    lastHash = hash;
-  }
-}
-//*/

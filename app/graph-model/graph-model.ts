@@ -112,6 +112,7 @@ export class GraphModel implements BasicGraph, GraphEdit {
   }
 
   mergeNode(node:GraphNode, properties:Object) {
+    this.merge(properties, node.properties);
   }
 
   hasNode(node:NodeId):boolean {

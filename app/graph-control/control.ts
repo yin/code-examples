@@ -2,28 +2,16 @@ import {Injectable} from "@angular/core";
 import {BasicGraph,GraphNode,GraphEdge,NodeId,GraphModel,GraphEdit} from "../graph-model/graph-model";
 import {GraphSelection, EmptySelection} from "./selection";
 import {GraphRenderer} from "./renderer";
-import {GraphCanvasInputHandler} from "./input";
+import {EditorInputHandler} from "./input";
 import {Commands,CommandsImpl} from "./commands";
 import {Vector2} from "./util/vector2";
 
-/** Constructs CanvasControl and all associated services. This would be a good place to use DI. */
-export class ControlFactory {
-/*  create(canvas:HTMLCanvasElement) {
-    var settings = new GraphControlSettings();
-    var render = new GraphRenderer(settings);
-    var commands = new CommandsImpl();
-    var provider = new GraphProvider(canvas);
-    var inputHandler = new GraphCanvasInputHandler(provider, settings);
-    return provider;
-  }*/
-}
-
 type ModelCallback = (GraphModel)=>void;
 
-/** Holds all components of the graph canvas and ensures proper updating of the display.
+/** Holds all components of the graph _canvas and ensures proper updating of the display.
  * This approach is not perfect, there are circular dependencies in the hierarchy.
  */
-export class GraphProvider {
+export class GraphCanvasModel {
   debug = false;
   private _model:GraphModel;
   private _selection:GraphSelection = EmptySelection.singleton;
@@ -63,7 +51,7 @@ export class GraphProvider {
   }
 }
 
-export class GraphControlSettings {
+export class GraphCanvasSettings {
   width:number;
   height:number;
   backgroundFill = '#ffffff';

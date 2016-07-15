@@ -1,6 +1,6 @@
 import {Injectable, Inject} from "@angular/core";
 import {NodeId,GraphNode,BasicGraph,GraphEdge} from "../graph-model/graph-model";
-import {GraphControlSettings} from "./control";
+import {GraphCanvasSettings} from "./control";
 import {Vector2} from "./util/vector2";
 
 const TWO_PI = 2 * Math.PI;
@@ -12,19 +12,21 @@ const BACKGROUND_PSEUDOCLASS = 'background';
 export class StyleProcessor {
   constructor() {}
 
-  applyStyle(ctx:CanvasRenderingContext2D, s:GraphControlSettings, object:any, pseudoclass:string) {
+  applyStyle(ctx:CanvasRenderingContext2D, s:GraphCanvasSettings, object:any, pseudoclass:string) {
     var isSelected = (item:any) => {
       var classes = item.properties['classes']
       if (Array.isArray(classes)) {
         return (<Array<string>>classes).includes(SELECTED_CLASS);
       }
     };
+
     var isPathSegment = (item:any) => {
       var classes = item.properties['classes']
       if (Array.isArray(classes)) {
         return (<Array<string>>classes).includes(PATH_SEGMENT_CLASS);
       }
     };
+
     var isArrow = pseudoclass == ARROW_PSEUDOCLASS;
 
     if (object instanceof GraphEdge) {
@@ -77,10 +79,8 @@ export class GraphRenderer {
   debug = false;
   private model:BasicGraph;
 
-  constructor(
-      @Inject(GraphControlSettings) private settings:GraphControlSettings,
-      @Inject(StyleProcessor) private styleProcessor:StyleProcessor) {
-  }
+  constructor(@Inject(GraphCanvasSettings) private settings:GraphCanvasSettings,
+              @Inject(StyleProcessor) private styleProcessor:StyleProcessor) {}
 
   draw(model:BasicGraph, ctx:CanvasRenderingContext2D) {
     if (this.debug) {

@@ -1,12 +1,10 @@
 import { Component, OnInit, ViewChild } from '@angular/core';
 import { GraphCanvas } from "./graph-canvas";
-import {GraphModel} from "./graph-model/graph-model";
+import {GraphModel,GraphOrientation} from "./graph-model/graph-model";
+import {GraphRenderer,StyleProcessor} from "./graph-control/renderer";
+import {GraphCanvasModel,GraphCanvasSettings} from "./graph-control/control";
 import {Vector2} from "./graph-control/util/vector2";
-import {GraphOrientation} from "./graph-model/graph-model";
-import {GraphProvider} from "./graph-control/control";
-import {GraphRenderer} from "./graph-control/renderer";
-import {GraphControlSettings} from "./graph-control/control";
-import {StyleProcessor} from "./graph-control/renderer";
+import {EditorInputHandler} from "./graph-control/input";
 
 @Component({
   selector: 'graph-editor',
@@ -28,7 +26,7 @@ import {StyleProcessor} from "./graph-control/renderer";
 export class GraphEditor {
   @ViewChild(GraphCanvas) private graphCanvas:GraphCanvas;
 
-  constructor(private provider:GraphProvider) {
+  constructor(private provider:GraphCanvasModel, private input:EditorInputHandler) {
     this.provider.addModelListener(this.onModelChanged.bind(this));
   }
 
@@ -40,7 +38,7 @@ export class GraphEditor {
   }
 
   ngAfterContentInit() {
-    console.log("GraphEditor init: ", this.graphCanvas)
+    this.input.install(this.graphCanvas.canvas);
     var model = new GraphModel(GraphOrientation.Directed);
     var n1 = model.edit.createNode({position: new Vector2(100, 100)});
     var n2 = model.edit.createNode({position: new Vector2(200, 130)});

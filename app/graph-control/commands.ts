@@ -1,5 +1,6 @@
+import {Inject} from "@angular/core";
 import {NodeId,GraphEdge,GraphNode,GraphModel,GraphEdit} from "../graph-model/graph-model";
-import {GraphProvider} from "./control";
+import {GraphCanvasModel} from "./control";
 import {GraphSelection} from "./selection";
 
 /** EditFunction's are command callbacks, which change the graph _model somehow. */
@@ -34,14 +35,14 @@ export interface ICommand {
 }
 
 export class CommandsImpl implements Commands {
-  constructor(private provider:GraphProvider) {}
+  constructor(@Inject(GraphCanvasModel) private canvasModel:GraphCanvasModel) {}
 
   select(selection:GraphSelection) {
-    this.execute(new SetSelectionCommand(this.provider, selection))
+    this.execute(new SetSelectionCommand(this.canvasModel, selection))
   }
 
   updateModel(transform:EditFunction) {
-    this.execute(new EditCommand(this.provider, transform))
+    this.execute(new EditCommand(this.canvasModel, transform))
   }
 
   execute(command:ICommand) {
@@ -52,7 +53,7 @@ export class CommandsImpl implements Commands {
 
 class SetSelectionCommand implements ICommand {
   private before:GraphSelection;
-  constructor(private provider:GraphProvider, private after:GraphSelection) {}
+  constructor(private provider:GraphCanvasModel, private after:GraphSelection) {}
   redo() {
     this.before = this.provider.selection;
     this.provider.selection = this.after;
@@ -63,7 +64,7 @@ class SetSelectionCommand implements ICommand {
 }
 
 class EditCommand {
-  constructor(private provider:GraphProvider, private transform:EditFunction) {}
+  constructor(private provider:GraphCanvasModel, private transform:EditFunction) {}
 
   redo() {
     // TODO yin: For undo to work, we need to wap GraphEdit into a recording proxy.
@@ -71,56 +72,5 @@ class EditCommand {
   }
   undo() {
     // TODO yin: Undo function should use the proxy to restore affected parts of the _model
-  }
-}
-
-class RecordingGraphEditProxy implements GraphEdit {
-  dirty:boolean = false;
-  private edit:GraphEdit;
-
-  setModel(model:GraphModel) {
-    this.edit = model.edit;
-  }
-
-  createNode(properties:Object):GraphNode {
-    var ret = this.edit.createNode(properties);
-    ret && this.markDirty();
-    return ret;
-  }
-
-  removeNode(node:NodeId):boolean {
-    var ret = this.edit.removeNode(node);
-    ret && this.markDirty();
-    return ret;
-  }
-
-  mergeNode(node:GraphNode, properties:Object) {
-    this.edit.mergeNode(node, properties);
-    this.markDirty();
-  }
-
-  createEdge(start:NodeId, end:NodeId, properties:Object):boolean {
-    var ret = this.edit.createEdge(start, end, properties);
-    ret && this.markDirty();
-    return ret;
-  }
-
-  removeEdge(start:NodeId, end:NodeId):boolean {
-    var ret = this.edit.removeEdge(start, end);
-    ret && this.markDirty();
-    return ret;
-  }
-
-  mergeEdge(edge:GraphEdge, properties:Object) {
-    this.edit.mergeEdge(edge, properties);
-    this.markDirty();
-  }
-
-  private markDirty() {
-    this.dirty = true;
-  }
-
-  public unmarkDirty() {
-    this.dirty = false;
   }
 }
