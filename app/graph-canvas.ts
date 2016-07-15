@@ -7,7 +7,6 @@ import {GraphRenderer, StyleProcessor} from "./graph-control/renderer";
   selector: 'graph-canvas',
   inputs: ['width', 'height'],
   template: `<canvas #canvas [attr.width]="width" [attr.height]="height"></canvas>`,
-  providers: [ GraphProvider, GraphControlSettings, StyleProcessor, GraphRenderer ]
 })
 export class GraphCanvas {
   private width:number = 640;

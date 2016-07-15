@@ -24,7 +24,6 @@ import {StyleProcessor} from "./graph-control/renderer";
       <p><button id="reset-path">Remove path</button> - Reset path</p>
   </div>`,
   directives: [ GraphCanvas ],
-  providers: [ GraphProvider, GraphControlSettings, StyleProcessor ]
 })
 export class GraphEditor {
   @ViewChild(GraphCanvas) private graphCanvas:GraphCanvas;
