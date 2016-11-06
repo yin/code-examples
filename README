@@ -12,12 +12,18 @@ downloaded. Requires some python-libs on your system, like mechanize.
 complete page and optionaly creates a PDF and archives the page in .tar.gz. Uses
 wget and wkhtmltopdf for PDF conversion.
 
+Usage and setup
+===============
+
+You need the folowing to build the tools in this repository:
+
+1. VirtualEnv for Python
+
 Links
 =====
 
-I keep the downloaded data in an Dropbox directory. They include no test data,
-or anything, what would make more attractive than the original site. And it's
-public anyway.
+I keep the downloaded data in an Dropbox directory. The problem descriptions,
+test sets and other codeforces stuff is public, but it is also copyrighted!
 
 - Codeforces website: http://codeforces.org/
 - Problems I worked on: https://www.dropbox.com/sh/69efu0t2gr6hf9f/AADHUU8Te5tO3tzZVBo0WApJa?dl=0
