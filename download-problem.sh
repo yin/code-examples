@@ -1,8 +1,10 @@
 #!/bin/bash
 
+set -x
+
 if [ "$#" -lt "1" ]; then
     echo "usage: $0 <problem-code> ..." >&2
-    echo "e.g.: $0 460 D" >&2
+    echo "e.g.: $0 460A 460B 460E" >&2
     exit 1
 fi
 
