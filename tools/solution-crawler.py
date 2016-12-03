@@ -56,20 +56,32 @@ class Crawler:
         doc = lxml.html.document_fromstring(content)#.getroottree().getroot()
         solutions = doc.cssselect('.status-frame-datatable')
         matches = []
-        for sol in solutions:
-            solution_names = sol.xpath('//tr[td[position()=3]]');
-            for solrow in solution_names:
-                if self.check_tr(solrow):
-                    solution = self.create_solution(solrow.getchildren())
-                    solution['source'] = self.get_source(solution)
-                    yield solution
+        if not solutions:
+            print "No solutions on this page"
+        else:
+            for sol in solutions:
+                solution_names = sol.xpath('//tr[td[position()=3]]');
+                for solrow in solution_names:
+                    if self.check_tr(solrow):
+                        solution = self.create_solution(solrow.getchildren())
+                        solution['source'] = self.get_source(solution)
+                        yield solution
+                    else:
+                        print "Not a solution:" + str(solrow.getchildren()[0].text_content()).strip()
 
     def check_tr(self, tr):
         tds = tr.getchildren()
-        td_name = tds[3].text_content()
+        td_id = str(tds[0].text_content()).strip()
+        td_name = tds[3].text_content().strip()
         td_status = tds[5].text_content()
-        return td_name.find(self.search_term) >= 0 \
-            and td_status.find(self.ACCEPTED) >= 0
+        if td_name.find(self.search_term) >= 0:
+            print "Solution %s name is not correct: %s" % (td_id, td_name)
+            return False
+        elif td_status.find(self.ACCEPTED) >= 0:
+            print "Solution %s was not %s" % (td_id, self.ACCEPTED)
+            return False
+        else:
+            return True
 
     @staticmethod
     def create_solution(tds):
@@ -104,7 +116,9 @@ class Crawler:
             return self.cache[key]
         else:
             debug("Server hit: {0}@submissionId={1}".format(url, submission_id))
-            resp = self.a.open(url, "submissionId=%s" % str(submission_id))
+            params = "submissionId=%s" % str(submission_id)
+            print url + "?" + params
+            resp = self.a.open(url, params)
             src = resp.get_data()
             self.cache[key] = src
             self.cache.sync()
@@ -150,5 +164,6 @@ if __name__ == '__main__':
     solutions = Crawler(argv[1]).crawl_range(range(start, end))
     if solutions != None:
         for sol in solutions:
+            print "Downloading: " + sol['problem']
             filename = save_solution(sol)
             print_solution(sol, filename)

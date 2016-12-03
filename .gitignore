@@ -1,10 +1,25 @@
+# Keep this data on a dropbox or local directory
+private/
+
+# Garbage from solving problems:
+output.txt
+
+# c
 a.out
 *.o
-*_TODO*
+
+# python
 .cache
-.venv/
-solutions
-problems
+venv/
+
+# java
 *.class
+
+# idea
 *.iml
+.idea/
 out/
+
+# emacs
+\#*#
+.#*
