@@ -1,0 +1,26 @@
+# Developement files
+.emacs.desktop
+*~
+
+# Executables
+xcb_box
+
+# Object files
+*.o
+*.ko
+
+# Libraries
+*.lib
+*.a
+
+# Shared objects (inc. Windows DLLs)
+*.dll
+*.so
+*.so.*
+*.dylib
+
+# Arbitrary executables
+*.exe
+*.out
+*.app
+

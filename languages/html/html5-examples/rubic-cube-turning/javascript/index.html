@@ -1,0 +1,92 @@
+<!doctype html>
+<html>
+<head>
+<style>
+body {
+    padding: 10px 16px 
+    background: #e8e8e8;
+}
+#code {
+    display: block;
+}
+#code_container {
+    float: left;
+}
+#console_container {
+    float: left;
+}
+#console {
+    width: 40em;
+    height: 35em;
+    background: #303030;
+}
+#console pre {
+    color: #30d030;
+    border-top: 1px solid #308030;
+    margin: 1px 2px;
+    padding: 2px 4px 1px 4px;
+}
+</style>
+<script type="text/javascript">
+if(console && console._log == undefined) {
+    console._log = console.log;
+    console.log = function() {
+        console._log.apply(console, arguments);
+        var con = document.getElementById('console');
+        var msg = document.createElement('pre');
+        var info = [];
+        for(var i = 0, l = arguments.length; i < l; i++) {
+            info.push(new String(arguments[i]));
+        }
+        msg.appendChild(document.createTextNode(info.join(' ')));
+        con.appendChild(msg);
+    }
+}
+function onkey(e) {
+    var key = e.key || e.keyCode;
+    if((key == 13 || key == 10) && e.ctrlKey) {
+        var target = e.target;
+        if (target.tagName != 'textarea') {
+            target = document.getElementById('code');
+        }
+        if(target) {
+            doEval(target);
+        } else {
+            console.log("Could not find code.");
+        }
+        return true;
+    }
+}
+function oneval(e) {
+    var elem = document.getElementById('code');
+    doEval(elem);
+}
+function doEval(elem) {
+    eval(elem.value);
+}
+</script>
+</head>
+<body onkeypress="onkey(event);">
+<div id="nav">
+  <a href="index.html">00 How it works</a>
+  <a href="01constructor-basic.html">01 Objects - Constructor</a>
+  <a href="02constructor-drawing.html">02 Objects - Constructor (drawing)</a>
+  <a href="03constructor-timing.html">03 Objects - Constructor (timing)</a>
+  <a href="04prototype-sequential.html">04 Objects - Prototype (sequential declaration)</a>
+  <a href="05prototype-moreobjects.html">05 Objects - Prototype (declaring all at once)</a>
+</div>
+<div id="code_container">
+  <h2>Code goes here:</h2>
+  <textarea rows="35" cols="80" id="code">
+console.log("Hello world")
+  </textarea>
+  <button id="run" onclick="oneval(event);">Ctrl+Enter to Run this code</button>
+</div>
+<div id="console_container">
+  <h2>Logs show up here:</h2>
+  <div id="console">
+  </div>
+</div>
+</body>
+</html>
+

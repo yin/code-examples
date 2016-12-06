@@ -1,0 +1,41 @@
+#include<iostream>
+#include<cmath>
+#include<string>
+#include<algorithm>
+#include<cstdio>
+#include<cstring>
+#include<vector>
+#include<stack>
+#include<queue>
+#include<map>
+#define FRU freopen("out.txt","w",stdout)
+#define FRO freopen("in.txt","r",stdin)
+#define pb push_back
+//const int row[]={-1, -1, -1,  0,  0,  1,  1,  1};  // Kings Move
+//const int col[]={-1,  0,  1, -1,  1, -1,  0,  1};  // Kings Move
+//const int row[]={-2, -2, -1, -1,  1,  1,  2,  2};  // Knights Move
+//const int col[]={-1,  1, -2,  2, -2,  2, -1,  1};  // Knights Move
+//const int row[]={-1,0,0,1,0};
+//const int col[]={0,-1,1,0,0};
+
+
+using namespace std;
+
+long long ans=0;
+int main()
+{
+//FRO;
+//FRU;
+    int a,b,c,i,j,k,tc,t;
+    int n,m,cnt=0,ara[300001];
+    scanf("%d",&n);
+    for(i=0;i<n;i++)scanf("%d",&ara[i]);
+    sort(ara,ara+n);
+    for(i=0;i<n;i++)
+    {
+            ans+=(long long)(i+2)*ara[i];
+    }
+    ans-=(long long)ara[n-1];
+    printf("%lld\n",ans);
+return 0;
+}

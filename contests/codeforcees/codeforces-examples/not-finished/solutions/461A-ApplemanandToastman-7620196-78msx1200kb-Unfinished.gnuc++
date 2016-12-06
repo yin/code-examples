@@ -1,0 +1,36 @@
+#include <iostream>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <map>
+#include <algorithm>
+using namespace std;
+#define MAXN 205
+#define inf 1000000005
+int n,a[300005];
+__int64 sum,ans;
+
+
+int main()
+{
+    //freopen("in", "r", stdin);
+    while(scanf("%d",&n)!=EOF)
+    {
+        sum=0;
+        ans=0;
+        for(int i=0;i<n;i++)
+        {
+            scanf("%d",&a[i]);
+            sum+=a[i];
+        }
+        sort(a,a+n);
+        ans=sum;
+        for(int i=0;i<n-1;i++)
+        {
+            ans+=sum;
+            sum-=a[i];
+        }
+        printf("%I64d\n",ans);
+    }
+    return 0;
+}

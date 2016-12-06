@@ -1,0 +1,5 @@
+.cache
+bin/
+dist/
+build/
+war/WEB-INF/classes/

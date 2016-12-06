@@ -1,0 +1,8 @@
+.idea/
+systemjs.config.js
+*.js.map
+dart/
+node_modules/
+typings/
+*.js
+angular-graphs.iml

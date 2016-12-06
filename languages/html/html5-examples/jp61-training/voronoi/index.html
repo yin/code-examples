@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <script src="https://code.jquery.com/jquery-1.11.2.min.js"></script>
+    <script src="math.js"></script>
+    <script src="voronoi.js"></script>
+    <script src="webgl.js"></script>
+    <script src="voronoi_webgl.js"></script>
+    <script src="index.js"></script>
+    <style>
+      canvas {
+        position: absolute;
+        border: 1px solid grey;
+        padding: 0;
+      }
+      .toolbar {
+        margin: auto 16px;
+        text-align: center;
+      }
+    </style>
+  </head>
+  <body onload="main(jQuery);">
+    <div class="toolbar">
+      <button id="morph">Morph</button>
+    </div>
+    <canvas id="canvas" width="600" height="600">Your browser does not support canvas tag.</canvas>
+  </body>
+</html>

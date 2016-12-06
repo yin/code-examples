@@ -1,0 +1,42 @@
+<html>
+<head>
+    <title>Angular 2 Graphs - Yin's GitHub repository</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="stylesheets/main.css">
+    <script src="node_modules/core-js/client/shim.min.js"></script>
+    <script src="node_modules/zone.js/dist/zone.js"></script>
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>
+    <script src="node_modules/systemjs/dist/system.src.js"></script>
+    <script src="systemjs.config.js"></script>
+    <script>
+        //*
+        System.config({
+            packages: {
+                app: {
+                    defaultExtension: 'js'
+                },
+            }
+        });
+        //*/
+        System.import('./app/main')
+                .then(null, console.error.bind(console));
+    </script>
+</head>
+<body>
+<h1>Angular 2 Graphs example</h1>
+
+<p>This is a demo of an Typescript implementation of a graph model
+    and different graph algoritms. It is based on my previous examples in
+    <a href="https://yin.github.io/dart-examples/">Dart examples</a>
+    <a href="https://github.com/yin/dart-examples/">repository</a>.
+    Currently the feature set is not complete:</p>
+<ul>
+    <li>nodes can be created and dragged around</li>
+</ul>
+<p>The graph model and UI logic is implemented in pure TypeScript. The model
+    and UI is then wired into Angular 2 API, so it can be easily used in an
+    Angular app.</p>
+<graph-editor></graph-editor>
+</body>
+</html>

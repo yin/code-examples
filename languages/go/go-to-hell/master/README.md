@@ -1,0 +1,2 @@
+# go-to-hell
+Go to Hell with all the misfeatures, which give people false sense of power. In this repository, the absolute basic stuff you need to build app will be shown, like flags. All the pit falls people are running into often are pointed out in the code. If you can find a new pitfall in the code, or you can show another way of getting into trouble with Go, just fork me and add it! All contributions are welcome.

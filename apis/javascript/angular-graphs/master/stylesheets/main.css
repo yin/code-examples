@@ -1,0 +1,30 @@
+
+body {
+  background-color: #F8F8F8;
+  font-family: 'Open Sans', sans-serif;
+  font-size: 14px;
+  font-weight: normal;
+  line-height: 1.2em;
+  margin: 30px;
+}
+
+canvas {
+  margin: 5px;
+  border: 1px solid grey;
+}
+
+h1, p {
+  color: #333;
+}
+
+h2 {
+  color: #666;
+}
+
+dt {
+  font-weight: bold;
+}
+dd {
+  margin-bottom: 0.5em;
+  margin-left: 2em;
+}
