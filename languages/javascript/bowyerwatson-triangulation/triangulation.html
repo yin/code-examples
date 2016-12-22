@@ -11,8 +11,8 @@
     }
     var p = [
     	];
-    for (var i = 0; i < 250; i++) {
-    	p.push(randomXY(50, 50, 200, 200));
+    for (var i = 0; i < 2500; i++) {
+    	p.push(randomXY(30, 30, 580, 420));
     }
 
   	function onInit() {
@@ -22,9 +22,10 @@
 
 	    ts = new BowyerWatson(p);
 		ctx.strokeStyle = '#0000FF';
+		ctx.globalAplha = 0.1;
 		drawTriangles(ts.verts, ts.buildSkeletonTriangles());
 	}
-	setInterval(doStep, 500);
+	setInterval(doStep, 5);
 	var maxCycles = p.length
 	var step = 0;
 	var actions = [

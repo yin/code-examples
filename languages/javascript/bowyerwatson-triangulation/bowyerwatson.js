@@ -10,10 +10,7 @@ var BowyerWatson = function(points) {
 	this.verts = points.slice(0);
 	this.tris = listInit();
 	this.num = points.length;
-
-	var boundPoints = boundingTriangle(points)
-	this.verts.push(boundPoints[0], boundPoints[1], boundPoints[2]);
-	listPush(this.tris, [this.num, this.num+1, this.num+2]);
+	this.computeSkeleton(points);
 }
 
 BowyerWatson.prototype = {};
@@ -57,6 +54,18 @@ BowyerWatson.prototype.fillDirty = function(index) {
 	}
 	this.dirty = [];
 }
+
+BowyerWatson.prototype.computeSkeleton = function(points) {
+	var box = boundingBox(points);
+	var delta = { x:box.max.x-box.min.x , y:box.max.y-box.min.y };
+	this.verts.push({ x:box.min.x-PAD, y:box.min.y-PAD });
+	this.verts.push({ x:box.min.x-PAD, y:box.max.y+PAD });
+	this.verts.push({ x:box.max.x+PAD, y:box.min.y-PAD });
+	this.verts.push({ x:box.max.x+PAD, y:box.max.y+PAD });
+	listPush(this.tris, [this.num, this.num+1, this.num+2]);
+	listPush(this.tris, [this.num+2, this.num+1, this.num+3]);
+};
+
 
 BowyerWatson.prototype.buildTriangles = function() {
 	var triangles = [];
@@ -171,7 +180,7 @@ function locatePoint(v, tri, d) {
 }
 
 // assuming `mat` is an NxN matrix
-//
+// not used, replaced by math.js
 function determinant(mat) {
 	if (mat.length == 1) {
 		return mat[0][0];
@@ -201,16 +210,6 @@ function minorMatrix(mat, col) {
 		minor.push(r);
 	}
 	return minor;
-}
-
-function boundingTriangle(points) {
-	var box = boundingBox(points);
-	var delta = { x:box.max.x-box.min.x , y:box.max.y-box.min.y };
-	return [
-			{ x:box.min.x-PAD,				y:box.min.y-PAD },
-			{ x:box.min.x-PAD,				y:box.max.y+delta.x+2*PAD },
-			{ x:box.max.x+delta.y+2*PAD,	y:box.min.y-PAD },
-	];
 }
 
 function triangle(a, b, c) {
