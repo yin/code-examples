@@ -4,6 +4,8 @@
 // Voronoi diagram of the points, which is the dual graph of the Delaunay triangulation.
 //
 
+const PAD = 25;
+
 var BowyerWatson = function(points) {
 	this.verts = points.slice(0);
 	this.tris = listInit();
@@ -51,6 +53,7 @@ BowyerWatson.prototype.fillDirty = function(index) {
 		var edge = polygon[j];
 		listPush(this.tris, [index, edge[0], edge[1]]);
 	}
+	this.dirty = [];
 }
 
 BowyerWatson.prototype.buildTriangles = function() {
@@ -58,7 +61,26 @@ BowyerWatson.prototype.buildTriangles = function() {
 	for (var cur = this.tris.next; cur != null; prev= cur, cur = cur.next) {
 		var tri = cur.data;
 		if (tri[0] < this.num && tri[1] < this.num && tri[2] < this.num) {
-			triangles.push(cur);
+			triangles.push(cur.data);
+		}
+	}
+	return triangles;
+}
+
+BowyerWatson.prototype.buildDirtyTriangles = function() {
+	var triangles = [];
+	for (var i = 0; i < this.dirty.length; i++) {
+		triangles.push(this.dirty[i]);
+	}
+	return triangles;
+}
+
+BowyerWatson.prototype.buildSkeletonTriangles = function() {
+	var triangles = [];
+	for (var cur = this.tris.next; cur != null; prev= cur, cur = cur.next) {
+		var tri = cur.data;
+		if (tri[0] >= this.num || tri[1] >= this.num || tri[2] >= this.num) {
+			triangles.push(cur.data);
 		}
 	}
 	return triangles;
@@ -177,9 +199,9 @@ function boundingTriangle(points) {
 	var box = boundingBox(points);
 	var delta = { x:box.max.x-box.min.x , y:box.max.y-box.min.y };
 	return [
-			{ x:box.min.x-1,			y:box.min.y-1 },
-			{ x:box.min.x-1,			y:box.max.y+delta.x+2 },
-			{ x:box.max.x+delta.y+2,	y:box.min.y-1 },
+			{ x:box.min.x-PAD,				y:box.min.y-PAD },
+			{ x:box.min.x-PAD,				y:box.max.y+delta.x+2*PAD },
+			{ x:box.max.x+delta.y+2*PAD,	y:box.min.y-PAD },
 	];
 }
 

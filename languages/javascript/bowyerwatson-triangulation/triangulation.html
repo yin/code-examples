@@ -24,20 +24,41 @@
 	var step = 0;
 	var actions = [
 		function(cycle, p, ts, ctx) {
-			ts.retriangulateForVertex(cycle);
-			drawTriangles(p, ts.buildTriangles());
+			ctx.opacity = 0.5;
+			ts.markDirtyTriangles(cycle);
+			ctx.strokeStyle = '#000000';
+			drawTriangles(ts.verts, ts.buildTriangles());
+			ctx.strokeStyle = '#0000FF';
+			drawTriangles(ts.verts, ts.buildSkeletonTriangles());
+			ctx.strokeStyle = '#FF0000';
+			drawTriangles(ts.verts, ts.buildDirtyTriangles());
 			drawPoint(p[cycle]);
-		}
+		},
+		function(cycle, p, ts, ctx) {
+			ctx.opacity = 0.5;
+			ts.fillDirty(cycle);
+			ctx.strokeStyle = '#000000';
+			drawTriangles(ts.verts, ts.buildTriangles());
+			ctx.strokeStyle = '#0000FF';
+			drawTriangles(ts.verts, ts.buildSkeletonTriangles());
+			ctx.strokeStyle = '#FF0000';
+			drawTriangles(ts.verts, ts.buildDirtyTriangles());
+			drawPoint(p[cycle]);
+		},
 	];
 
 	function doStep() {
-		var cycle = step / actions.length;
+		var cycle = Math.floor(step / actions.length);
 		var actionNum = step % actions.length;
 		if (cycle < maxCycles) {
-		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+			doClear();
 		    actions[actionNum](cycle, p, ts, ctx);
 			step++;
 		}
+	}
+
+	function doClear() {
+	    ctx.clearRect(0, 0, canvas.width, canvas.height);
 	}
 
 	function drawTriangles(verts, tris) {
@@ -48,10 +69,11 @@
 
 	function drawTriangle(verts, t) {
     	ctx.beginPath();
-    	var p0 = p[t.data[2]];
+
+    	var p0 = verts[t[2]];
 		ctx.moveTo(p0.x, p0.y);
 		for (var j = 0; j < 3; j++) {
-	    	p0 = p[t.data[j]];
+	    	p0 = verts[t[j]];
 			ctx.lineTo(p0.x, p0.y);
 		}
   		ctx.stroke();
@@ -68,5 +90,6 @@
 <body onload="onInit()">
   <canvas id="canvas" width="640" height="480"></canvas>
   <button onclick="doStep()">Step</button>
+  <button onclick="doClear()">Clear</button>
 </body>
 </html>
