@@ -37,12 +37,19 @@ BowyerWatson.prototype.markDirtyTriangles = function(d) {
 	this.dirty = [];
 	var prev = this.tris;
 	var cur = this.tris.next;
-	for (; cur != null; prev = cur, cur = cur.next) {
+	for (; cur != null; cur = cur.next) {
 		var tri = cur.data;
 		var loc = locatePoint(this.verts, tri, d);
-		if (loc > 0) {
+			ctxGreen();
+			drawTriangle(this.verts, tri);
+
+		if (loc < 0) {
+			ctxRed();
+			drawTriangle(this.verts, tri);
 			this.dirty.push(cur.data);
 			listPop(prev);
+		} else {
+			prev = cur;
 		}
 	}
 }
@@ -52,6 +59,8 @@ BowyerWatson.prototype.fillDirty = function(index) {
 	for (var j = 0; j < polygon.length; j++) {
 		var edge = polygon[j];
 		listPush(this.tris, [index, edge[0], edge[1]]);
+		ctxGreen();
+		drawTriangle(this.verts, this.tris.next.data);
 	}
 	this.dirty = [];
 }
@@ -61,7 +70,7 @@ BowyerWatson.prototype.buildTriangles = function() {
 	for (var cur = this.tris.next; cur != null; prev= cur, cur = cur.next) {
 		var tri = cur.data;
 		if (tri[0] < this.num && tri[1] < this.num && tri[2] < this.num) {
-			triangles.push(cur.data);
+			triangles.push(tri);
 		}
 	}
 	return triangles;
@@ -158,7 +167,7 @@ function locatePoint(v, tri, d) {
 		[v[c].x, v[c].y, v[c].x*v[c].x + v[c].y*v[c].y, 1],
 		[v[d].x, v[d].y, v[d].x*v[d].x + v[d].y*v[d].y, 1],
 	];
-	var detM = determinant(m);
+	var detM = math.det(m);
 	return detM;
 }
 

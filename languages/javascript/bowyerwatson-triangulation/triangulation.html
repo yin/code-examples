@@ -1,5 +1,6 @@
 <html>
 <head>
+  <script src="node_modules/mathjs/dist/math.min.js"></script>
   <script src="bowyerwatson.js"></script>
   <script>
 	var ts;
@@ -19,6 +20,8 @@
 	    ctx.clearRect(0, 0, canvas.width, canvas.height);
 
 	    ts = new BowyerWatson(p);
+		ctx.strokeStyle = '#0000FF';
+		drawTriangles(ts.verts, ts.buildSkeletonTriangles());
 	}
 	var maxCycles = p.length
 	var step = 0;
@@ -26,23 +29,27 @@
 		function(cycle, p, ts, ctx) {
 			ctx.opacity = 0.5;
 			ts.markDirtyTriangles(cycle);
-			ctx.strokeStyle = '#000000';
-			drawTriangles(ts.verts, ts.buildTriangles());
 			ctx.strokeStyle = '#0000FF';
 			drawTriangles(ts.verts, ts.buildSkeletonTriangles());
+			ctx.strokeStyle = '#000000';
+			drawTriangles(ts.verts, ts.buildTriangles());
 			ctx.strokeStyle = '#FF0000';
 			drawTriangles(ts.verts, ts.buildDirtyTriangles());
 			drawPoint(p[cycle]);
 		},
 		function(cycle, p, ts, ctx) {
-			ctx.opacity = 0.5;
-			ts.fillDirty(cycle);
-			ctx.strokeStyle = '#000000';
-			drawTriangles(ts.verts, ts.buildTriangles());
 			ctx.strokeStyle = '#0000FF';
 			drawTriangles(ts.verts, ts.buildSkeletonTriangles());
-			ctx.strokeStyle = '#FF0000';
-			drawTriangles(ts.verts, ts.buildDirtyTriangles());
+			ctx.strokeStyle = '#000000';
+			drawTriangles(ts.verts, ts.buildTriangles());
+			drawPoint(p[cycle]);
+		},
+		function(cycle, p, ts, ctx) {
+			ts.fillDirty(cycle);
+			ctx.strokeStyle = '#0000FF';
+			drawTriangles(ts.verts, ts.buildSkeletonTriangles());
+			ctx.strokeStyle = '#000000';
+			drawTriangles(ts.verts, ts.buildTriangles());
 			drawPoint(p[cycle]);
 		},
 	];
@@ -51,6 +58,7 @@
 		var cycle = Math.floor(step / actions.length);
 		var actionNum = step % actions.length;
 		if (cycle < maxCycles) {
+			console.log("cycle:" + cycle + " action:" + actionNum);
 			doClear();
 		    actions[actionNum](cycle, p, ts, ctx);
 			step++;
@@ -85,6 +93,13 @@
   		ctx.stroke();
   	}
 
+	function ctxRed() {
+		ctx.strokeStyle = '#FF0000';
+	}
+
+	function ctxGreen() {
+		ctx.strokeStyle = '#00FF00';
+	}
   </script>
 </head>
 <body onload="onInit()">

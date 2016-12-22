@@ -1,0 +1,15 @@
+{
+  "name": "bowyerwatson-triangulation",
+  "version": "1.0.0",
+  "description": "A library to compute triangulation using the bowyer-watson algorithm",
+  "main": "bowyerwatson.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "yinotaurus@gmail.com",
+  "license": "MIT",
+  "dependencies": {
+    "math.js": "^1.0.16",
+    "mathjs": "^3.8.1"
+  }
+}
