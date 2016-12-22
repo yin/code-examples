@@ -248,3 +248,7 @@ function boundingBox(points) {
 	return { min:min, max:max };
 }
 
+module.exports = {
+	BowyerWatson: BowyerWatson,
+	tracePolygon: tracePolygon,
+};
