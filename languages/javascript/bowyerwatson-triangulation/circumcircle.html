@@ -2,15 +2,16 @@
 <head>
   <script src="node_modules/mathjs/dist/math.min.js"></script>
   <script src="bowyerwatson.js"></script>
+  <script src="draw.js"></script>
   <script>
 	var ts;
 	var canvas;
 	var ctx;
     var p = [
-    	{x:50.0, y:50.0},
-    	{x:100.0, y:150.0},
-    	{x:150.0, y:100.0},
-    	{x:150.0, y:11.0},
+    	[  50.0, 50.0 ],
+    	[ 110.0, 150.0 ],
+    	[ 150.0, 100.0 ],
+    	[ 150.0, 11.0 ],
 	];
     var t = [0, 1, 2];
 
@@ -21,9 +22,10 @@
 	}
 
 	function mouseOver(event) {
-		var d = { x:event.clientX, y:event.clientY };
+		var d = [ event.clientX, event.clientY ];
 		p[3] = d;
 		doClear();
+		drawCircle(p[1], p[2], p[0])
 		drawTriangle(p, t);
 		drawPoint(d);
 		var det = locatePoint(p, t, 3)
@@ -31,42 +33,6 @@
 		document.getElementById('out-pointLocation').value = det;
 		document.getElementById('out-testDet').value = determinant(
 			[[1, 2, 3], [3, 2, 1], [2, 1, 3]]);
-	}
-
-	function doClear() {
-	    ctx.clearRect(0, 0, canvas.width, canvas.height);
-	}
-
-	function drawTriangles(verts, tris) {
-	    for (var i = 0; i < tris.length; i++) {
-	    	drawTriangle(verts, tris[i]);
-	    }
-	}
-
-	function drawTriangle(verts, t) {
-    	ctx.beginPath();
-
-    	var p0 = verts[t[2]];
-		ctx.moveTo(p0.x, p0.y);
-		for (var j = 0; j < 3; j++) {
-	    	p0 = verts[t[j]];
-			ctx.lineTo(p0.x, p0.y);
-		}
-  		ctx.stroke();
-	}
-
-	function drawPoint(p) {
-    	ctx.beginPath();
-		ctx.arc(p.x, p.y, 4, 0, 2 * Math.PI, true);
-  		ctx.stroke();
-  	}
-
-	function ctxRed() {
-		ctx.strokeStyle = '#FF0000';
-	}
-
-	function ctxGreen() {
-		ctx.strokeStyle = '#00FF00';
 	}
   </script>
 </head>

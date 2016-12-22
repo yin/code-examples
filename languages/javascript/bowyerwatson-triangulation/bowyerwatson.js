@@ -5,6 +5,7 @@
 //
 
 const PAD = 25;
+const X = 0, Y = 1;
 
 var BowyerWatson = function(points) {
 	this.verts = points.slice(0);
@@ -14,11 +15,11 @@ var BowyerWatson = function(points) {
 }
 
 BowyerWatson.prototype = {};
-BowyerWatson.prototype.triangulate = function(points) {
-	if (points.length < 3) {
-		return [];
-	}
-	for (var i = 0; i < points.length; i++) {
+BowyerWatson.prototype.triangulate = function() {
+	this.triangulateUpTo(this.verts);
+}
+BowyerWatson.prototype.triangulateUpTo = function(num) {
+	for (var i = 0; i < num; i++) {
 		this.retriangulateForVertex(i);
 	}
 }
@@ -37,7 +38,15 @@ BowyerWatson.prototype.markDirtyTriangles = function(d) {
 	for (; cur != null; cur = cur.next) {
 		var tri = cur.data;
 		var loc = locatePoint(this.verts, tri, d);
+
+//		ctxGreen()
+//		drawTriangle(this.verts, tri);
+
+//		drawCircle(this.verts[tri[0]], this.verts[tri[1]], this.verts[tri[2]]);
+
 		if (loc < 0) {
+//			ctxRed();
+//			drawTriangle(this.verts, tri);
 			this.dirty.push(cur.data);
 			listPop(prev);
 		} else {
@@ -57,11 +66,11 @@ BowyerWatson.prototype.fillDirty = function(index) {
 
 BowyerWatson.prototype.computeSkeleton = function(points) {
 	var box = boundingBox(points);
-	var delta = { x:box.max.x-box.min.x , y:box.max.y-box.min.y };
-	this.verts.push({ x:box.min.x-PAD, y:box.min.y-PAD });
-	this.verts.push({ x:box.min.x-PAD, y:box.max.y+PAD });
-	this.verts.push({ x:box.max.x+PAD, y:box.min.y-PAD });
-	this.verts.push({ x:box.max.x+PAD, y:box.max.y+PAD });
+	var delta = [box.max[X]-box.min[X], box.max[Y]-box.min[Y]];
+	this.verts.push([ box.min[X]-PAD, box.min[Y]-PAD ]);
+	this.verts.push([ box.min[X]-PAD, box.max[Y]+PAD ]);
+	this.verts.push([ box.max[X]+PAD, box.min[Y]-PAD ]);
+	this.verts.push([ box.max[X]+PAD, box.max[Y]+PAD ]);
 	listPush(this.tris, [this.num, this.num+1, this.num+2]);
 	listPush(this.tris, [this.num+2, this.num+1, this.num+3]);
 };
@@ -170,14 +179,16 @@ function listToArray(list) {
 function locatePoint(v, tri, d) {
 	var a = tri[0], b = tri[1], c = tri[2]
 	var m = [
-		[v[a].x, v[a].y, v[a].x*v[a].x + v[a].y*v[a].y, 1],
-		[v[b].x, v[b].y, v[b].x*v[b].x + v[b].y*v[b].y, 1],
-		[v[c].x, v[c].y, v[c].x*v[c].x + v[c].y*v[c].y, 1],
-		[v[d].x, v[d].y, v[d].x*v[d].x + v[d].y*v[d].y, 1],
+		[v[a][X], v[a][Y], v[a][X]*v[a][X] + v[a][Y]*v[a][Y], 1],
+		[v[b][X], v[b][Y], v[b][X]*v[b][X] + v[b][Y]*v[b][Y], 1],
+		[v[c][X], v[c][Y], v[c][X]*v[c][X] + v[c][Y]*v[c][Y], 1],
+		[v[d][X], v[d][Y], v[d][X]*v[d][X] + v[d][Y]*v[d][Y], 1],
 	];
 	var detM = math.det(m);
 	return detM;
 }
+
+
 
 // assuming `mat` is an NxN matrix
 // not used, replaced by math.js
@@ -222,25 +233,25 @@ function edgesEqual(edge1, edge2) {
 }
 
 function pointsEqual(p1, p2) {
-	return p1.x == p2.x && p1.y == p2.y;
+	return p1[X] == p2[X] && p1[Y] == p2[Y];
 }
 
 function boundingBox(points) {
-	var min = { x:null, y:null },
-		max = { x:null, y:null };
+	var min = [ null, null ],
+		max = [ null, null ];
 	for (var i = 0; i < points.length; i++) {
 		var p = points[i];
-		if (min.x == null || min.x > p.x) {
-			min.x = p.x
+		if (min[X] == null || min[X] > p[X]) {
+			min[X] = p[X]
 		}
-		if (min.y == null || min.y > p.y) {
-			min.y = p.y
+		if (min[Y] == null || min[Y] > p[Y]) {
+			min[Y] = p[Y]
 		}
-		if (max.x == null || max.x < p.x) {
-			max.x = p.x
+		if (max[X] == null || max[X] < p[X]) {
+			max[X] = p[X]
 		}
-		if (max.y == null || max.y < p.y) {
-			max.y = p.y
+		if (max[Y] == null || max[Y] < p[Y]) {
+			max[Y] = p[Y]
 		}
 	}
 	return { min:min, max:max };
