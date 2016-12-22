@@ -99,32 +99,38 @@ BowyerWatson.prototype.buildSkeletonTriangles = function() {
 // Merges triangles into a polygon - by removing duplicate edges.
 function tracePolygon(tris) {
 	var edges = listInit();
+	var count = 0;
+	function reduceEdge(edge) {
+		if (polygonReduceEdge(edges, edge)) {
+			count++;
+			listPush(edges, edge);
+		} else {
+			count--;
+		}
+	}
 	for (var i = 0; i < tris.length; i++) {
 		var tri = tris[i];
-		var e1 = [tri[0], tri[1]];
-		var e2 = [tri[1], tri[2]];
-		var e3 = [tri[2], tri[0]];
-		listPush(edges, e1);
-		listPush(edges, e2);
-		listPush(edges, e3);
+		reduceEdge([tri[0], tri[1]]);
+		reduceEdge([tri[1], tri[2]]);
+		reduceEdge([tri[2], tri[0]]);
 	}
-	reduceSharedEdges(edges);
 	return listToArray(edges);
 }
 
 function reduceSharedEdges(edges) {
 	var count = 0;
 	for (var cur = edges.next; cur != null; cur = cur.next) {
-		if (reduceEdge(edges, cur)) count++;
 	}
 	return count;
 }
 
-function reduceEdge(edges, edge) {
+function polygonReduceEdge(edges, edge) {
+	var one = edge;
 	var prev = edges;
 	var cur = edges.next;
 	for (; cur != edge && cur != null; prev = cur, cur = cur.next) {
-		if (edgesEqual(cur.data, edge)) {
+		var other = cur.data;
+		if (edgesEqual(one, other)) {
 			listPop(prev);
 			return false;
 		}
@@ -248,7 +254,18 @@ function boundingBox(points) {
 	return { min:min, max:max };
 }
 
-module.exports = {
+var mymodule = {
 	BowyerWatson: BowyerWatson,
 	tracePolygon: tracePolygon,
+	edgesEqual: edgesEqual
 };
+ 
+if( typeof exports !== 'undefined' ) {
+	if( typeof module !== 'undefined' && module.exports ) {
+		// nodejs
+		exports = module.exports = mymodule
+	}
+	exports.bw = mymodule
+} else {
+	//browser
+}	
