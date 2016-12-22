@@ -40,12 +40,7 @@ BowyerWatson.prototype.markDirtyTriangles = function(d) {
 	for (; cur != null; cur = cur.next) {
 		var tri = cur.data;
 		var loc = locatePoint(this.verts, tri, d);
-			ctxGreen();
-			drawTriangle(this.verts, tri);
-
 		if (loc < 0) {
-			ctxRed();
-			drawTriangle(this.verts, tri);
 			this.dirty.push(cur.data);
 			listPop(prev);
 		} else {
@@ -59,8 +54,6 @@ BowyerWatson.prototype.fillDirty = function(index) {
 	for (var j = 0; j < polygon.length; j++) {
 		var edge = polygon[j];
 		listPush(this.tris, [index, edge[0], edge[1]]);
-		ctxGreen();
-		drawTriangle(this.verts, this.tris.next.data);
 	}
 	this.dirty = [];
 }
