@@ -28,6 +28,7 @@
 		drawTriangles(p, ts.buildTriangles());
 		drawPoint(p[c]);
 		c++;
+		c=c%p.length;
 	}
 
 	function drawTriangles(verts, tris) {
