@@ -25,8 +25,28 @@ BowyerWatson.prototype.triangulate = function(points) {
 }
 
 BowyerWatson.prototype.retriangulateForVertex = function(index) {
-	var dirty = findAffectedArea(this.verts, this.tris, index);
-	var polygon = tracePolygon(dirty);
+	this.markDirtyTriangles(index);
+	this.fillDirty(index);
+}
+
+// Moves triangles, which will need t=retriangulation into `this.dirty` array
+// That is every triangle, for which a given point `d` falls iside its circumcircle.
+BowyerWatson.prototype.markDirtyTriangles = function(d) {
+	this.dirty = [];
+	var prev = this.tris;
+	var cur = this.tris.next;
+	for (; cur != null; prev = cur, cur = cur.next) {
+		var tri = cur.data;
+		var loc = locatePoint(this.verts, tri, d);
+		if (loc > 0) {
+			this.dirty.push(cur.data);
+			listPop(prev);
+		}
+	}
+}
+
+BowyerWatson.prototype.fillDirty = function(index) {
+	var polygon = tracePolygon(this.dirty);
 	for (var j = 0; j < polygon.length; j++) {
 		var edge = polygon[j];
 		listPush(this.tris, [index, edge[0], edge[1]]);
@@ -44,21 +64,6 @@ BowyerWatson.prototype.buildTriangles = function() {
 	return triangles;
 }
 
-// Finds every triangle, for which a given point `d` falls iside its circumcircle.
-function findAffectedArea(verts, tris, d) {
-	var dirty = [];
-	var prev = tris;
-	var cur = tris.next;
-	for (; cur != null; prev = cur, cur = cur.next) {
-		var tri = cur.data;
-		var loc = locatePoint(verts, tri, d);
-		if (loc > 0) {
-			dirty.push(cur.data);
-			listPop(prev);
-		}
-	}
-	return dirty;
-}
 
 // Merges triangles into a polygon - by removing duplicate edges.
 function tracePolygon(tris) {

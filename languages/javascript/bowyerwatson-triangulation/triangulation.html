@@ -20,15 +20,24 @@
 
 	    ts = new BowyerWatson(p);
 	}
-	var c = 0;
+	var maxCycles = p.length
+	var step = 0;
+	var actions = [
+		function(cycle, p, ts, ctx) {
+			ts.retriangulateForVertex(cycle);
+			drawTriangles(p, ts.buildTriangles());
+			drawPoint(p[cycle]);
+		}
+	];
 
-	function step() {
-	    ctx.clearRect(0, 0, canvas.width, canvas.height);
-		ts.retriangulateForVertex(c);
-		drawTriangles(p, ts.buildTriangles());
-		drawPoint(p[c]);
-		c++;
-		c=c%p.length;
+	function doStep() {
+		var cycle = step / actions.length;
+		var actionNum = step % actions.length;
+		if (cycle < maxCycles) {
+		    ctx.clearRect(0, 0, canvas.width, canvas.height);
+		    actions[actionNum](cycle, p, ts, ctx);
+			step++;
+		}
 	}
 
 	function drawTriangles(verts, tris) {
@@ -58,6 +67,6 @@
 </head>
 <body onload="onInit()">
   <canvas id="canvas" width="640" height="480"></canvas>
-  <button onclick="step()">Step</button>
+  <button onclick="doStep()">Step</button>
 </body>
 </html>
