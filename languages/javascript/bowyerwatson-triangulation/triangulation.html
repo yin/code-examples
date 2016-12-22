@@ -1,0 +1,62 @@
+<html>
+<head>
+  <script src="bowyerwatson.js"></script>
+  <script>
+	var ts;
+	var canvas;
+	var ctx;
+    var p = [
+    	{x:100.0, y:100.0},
+    	{x:200.0, y:100.0}, {x:100.0, y:200.0}, {x:200.0, y:200.0},
+    	//*
+    	{x:300.0, y:100.0}, /* {x:300.0, y:200.0},
+    	{x:100.0, y:300.0}, {x:200.0, y:300.0}, {x:300.0, y:300.0}
+    	//*/
+    	];
+  	function onInit() {
+	    canvas = document.getElementById('canvas');
+	    ctx = canvas.getContext("2d");
+	    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+	    ts = new BowyerWatson(p);
+	}
+	var c = 0;
+
+	function step() {
+	    ctx.clearRect(0, 0, canvas.width, canvas.height);
+		ts.retriangulateForVertex(c);
+		drawTriangles(p, ts.buildTriangles());
+		drawPoint(p[c]);
+		c++;
+	}
+
+	function drawTriangles(verts, tris) {
+	    for (var i = 0; i < tris.length; i++) {
+	    	drawTriangle(verts, tris[i]);
+	    }
+	}
+
+	function drawTriangle(verts, t) {
+    	ctx.beginPath();
+    	var p0 = p[t.data[2]];
+		ctx.moveTo(p0.x, p0.y);
+		for (var j = 0; j < 3; j++) {
+	    	p0 = p[t.data[j]];
+			ctx.lineTo(p0.x, p0.y);
+		}
+  		ctx.stroke();
+	}
+
+	function drawPoint(p) {
+    	ctx.beginPath();
+		ctx.arc(p.x, p.y, 1, 0, 2 * Math.PI, true);
+  		ctx.stroke();
+  	}
+
+  </script>
+</head>
+<body onload="onInit()">
+  <canvas id="canvas" width="640" height="480"></canvas>
+  <button onclick="step()">Step</button>
+</body>
+</html>
