@@ -1,12 +1,14 @@
-// Wikipedia: In computational geometry, the Bowyer–Watson algorithm is
-// a method for computing the Delaunay triangulation of a finite set of points
-// in any number of dimensions. The algorithm can be also used to obtain a
-// Voronoi diagram of the points, which is the dual graph of the Delaunay triangulation.
-//
+var math = require('mathjs');
 
 const PAD = 25;
 const X = 0, Y = 1;
 
+/**
+ * Wikipedia: In computational geometry, the Bowyer–Watson algorithm is
+ * a method for computing the Delaunay triangulation of a finite set of points
+ * in any number of dimensions. The algorithm can be also used to obtain a
+ * Voronoi diagram of the points, which is the dual graph of the Delaunay triangulation.
+ */
 var BowyerWatson = function(points) {
 	this.verts = points.slice(0);
 	this.tris = listInit();
